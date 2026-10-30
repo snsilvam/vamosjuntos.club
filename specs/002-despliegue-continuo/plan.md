@@ -19,7 +19,7 @@ Enfoque técnico: **la misma estructura de `kaizen-app`**, por decisión del res
 - Un solo job por workflow.
 - WIF con una cuenta de servicio y un proveedor por repo.
 - Docker hacia Artifact Registry y `gcloud run deploy`.
-- El único secreto, `SESSION_KEY`, en los secrets del repo de GitHub, pasado a Cloud Run como
+- *(Hasta la spec 008)* el único secreto, `SESSION_KEY`, en los secrets del repo de GitHub, pasado a Cloud Run como
   variable de entorno. El catálogo vive en Firestore.
 
 Sobre esa base se agrega solo lo que la spec exige:

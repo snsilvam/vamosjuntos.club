@@ -99,11 +99,10 @@ for role in roles/firebasehosting.admin roles/run.viewer \
 done
 ```
 
-### 1.7 Secret en GitHub
+### 1.7 Secrets y variables en GitHub
 
-En `snsilvam/vamosjuntos-backend`, entra a *Settings → Secrets and variables → Actions → New
-repository secret* y crea `SESSION_KEY` con la salida de `openssl rand -base64 32`. Genérala en tu
-terminal y no la pegues en otro lado.
+Desde la spec 008 el backend no usa secrets; `SESSION_KEY` se borra. El frontend necesita las
+**variables** `VITE_FIREBASE_*`: ver el [quickstart de 008, §1](../008-autenticacion-firebase/quickstart.md).
 
 Los invitados ya no son un secret (enmienda v2.0.0): viven en Firestore. Ver el
 [quickstart de 001, §5](../001-onboarding-sesion/quickstart.md).
@@ -158,16 +157,16 @@ que exista el servicio de Cloud Run del rewrite.
 | 9 | En *Actions*, "Run workflow" sobre `production` | Se vuelve a desplegar el mismo commit | FR-003 |
 | 10 | "Run workflow" eligiendo `main` | El job se salta (`if`) y no se publica nada | FR-002 |
 | 11 | `git revert` en `main` del commit del escenario 1 y `git push origin main:production` | En menos de 15 min la revisión activa vuelve al código anterior | US4, SC-004 |
-| 12 | Antes de abrir la app a la familia: borra el secret `SESSION_KEY` y usa "Run workflow" | Falla en "Validar secrets" sin desplegar y la revisión anterior sigue sirviendo. Luego créalo con un valor nuevo y relanza (eso cierra las sesiones de prueba) | Caso borde: falta un secreto |
-| 13 | En el log del paso de despliegue | El valor de `SESSION_KEY` aparece como `***` | FR-010 |
+| 12 | Borra temporalmente la variable `VITE_FIREBASE_APP_ID` del frontend y usa "Run workflow" | Falla en "Validate Firebase config" sin publicar y el sitio anterior sigue. Luego restáurala y relanza | Caso borde: falta configuración |
+| 13 | `git grep -n "secrets\." -- .github` en ambos repos | 0 resultados (desde la spec 008) | FR-010 |
 | 14 | En ambos repos: `git grep -nIiE "private_key\|BEGIN .*PRIVATE KEY"` y `git grep -nI "<un código real>"` (prueba 2 o 3) | 0 resultados | SC-003, FR-010 |
 
 ## 4. Operación
 
 - **Cambiar el catálogo**: edita `events/paseo-familiar-diciembre-2026/users` en la consola de
   Firestore. Aplica de inmediato, sin desplegar.
-- **Rotar `SESSION_KEY`**: pon un valor nuevo de `openssl rand -base64 32` y usa "Run workflow".
-  Todas las sesiones se cierran.
+- **Sesiones**: las maneja Firebase Authentication (spec 008). Para cortar el acceso de una cuenta,
+  deshabilítala en *Authentication → Usuarios* o borra su vínculo en `links`.
 - **Emergencia, si no hay tiempo para esperar el pipeline**:
   - Cloud Run: *Manage traffic* hacia la revisión anterior.
   - Hosting: *Rollback* a la versión anterior.

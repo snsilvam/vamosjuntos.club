@@ -6,6 +6,11 @@
 
 **Status**: Draft
 
+> **Reemplazo parcial (constitución v3.0.0)**: la spec
+> [008-autenticacion-firebase](../008-autenticacion-firebase/spec.md) reemplaza FR-008, FR-009 y
+> FR-011 (sesión propia y reingreso solo con código) por inicio de sesión con Firebase
+> Authentication. El resto de esta spec sigue vigente.
+
 **Input**: Derivado de la constitución v1.1.0 (Principio II y "Dominio de la V1"), enmendada en la
 v2.0.0: "Todo usuario
 nuevo debe seleccionar su nombre de la lista, ingresar su código de invitación del evento y

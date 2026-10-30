@@ -80,7 +80,7 @@ fases 3 y 4.
   - `roles/iam.workloadIdentityUser` para el `principalSet` de `snsilvam/vamosjuntos-frontend`;
   - `roles/firebasehosting.admin`, `roles/run.viewer`, `roles/serviceusage.apiKeysViewer` y
     `roles/serviceusage.serviceUsageConsumer` en el proyecto.
-- [ ] T010 (responsable) Crear en `snsilvam/vamosjuntos-backend` el repository secret `SESSION_KEY` con la salida de `openssl rand -base64 32` (§1.7). Si ya se creó `GUESTS_JSON`, borrarlo: el catálogo vive en Firestore (enmienda v2.0.0)
+- [X] T010 (responsable) Crear en `snsilvam/vamosjuntos-backend` el repository secret `SESSION_KEY` con la salida de `openssl rand -base64 32` (§1.7). Si ya se creó `GUESTS_JSON`, borrarlo: el catálogo vive en Firestore (enmienda v2.0.0)
 - [X] T011 (responsable) Crear el documento `events/paseo-familiar-diciembre-2026` en la base `vamosjuntos-club-db` (quickstart de 001, §4)
 - [X] T012 Verificar la configuración con `gcloud` (depende de T003 a T009):
   - `artifacts repositories describe containers`;
@@ -139,7 +139,7 @@ fases 3 y 4.
   - el secret `SESSION_KEY` (sin valor) y que los invitados viven en Firestore;
   - cómo relanzar, cambiar el catálogo y revertir (quickstart §4).
 - [X] T021 [US1] Hacer commit de T013 a T020 en la rama `002-despliegue-continuo` del backend
-- [ ] T022 [US1] (visto bueno) Primer despliegue del backend (depende de la Fase 2 y de T021):
+- [X] T022 [US1] (visto bueno) Primer despliegue del backend (depende de la Fase 2 y de T021):
   1. integrar `001-onboarding-sesion` y `002-despliegue-continuo` en `main`;
   2. `git push origin main` y `git push origin main:production`;
   3. seguir la ejecución en *Actions*;
@@ -184,7 +184,7 @@ fases 3 y 4.
 - [X] T028 [US2] Revisar vamosjuntos-frontend/.github/workflows/front-deploy.yml con `actionlint` y confirmar que `npm run build` pasa en local (depende de T027)
 - [X] T029 [P] [US2] Agregar una sección "Despliegue" a vamosjuntos-frontend/README.md con el flujo feature → `main` → `production`, qué hace el pipeline, el rewrite de `/api/**` y cómo relanzar o revertir
 - [X] T030 [US2] Hacer commit de T024 a T029 en la rama `002-despliegue-continuo` del frontend
-- [ ] T031 [US2] (visto bueno) Primer despliegue del frontend (depende de T022 y T030):
+- [X] T031 [US2] (visto bueno) Primer despliegue del frontend (depende de T022 y T030):
   1. integrar `002-despliegue-continuo` en `main`;
   2. `git push origin main` y `git push origin main:production`;
   3. comprobar con los `curl` de quickstart §2.2: `/api/...` responde `no-store` y `/inicio` responde `no-cache`.

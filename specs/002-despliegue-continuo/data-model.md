@@ -50,7 +50,11 @@ su propia cuenta.
 
 | Secret de GitHub (repo `vamosjuntos-backend`) | Variable en Cloud Run | Contenido | Lo crea |
 |-----------------------------------------------|-----------------------|-----------|---------|
-| `SESSION_KEY` | `SESSION_KEY` | 32 bytes aleatorios en base64 (`openssl rand -base64 32`) | El responsable, en *Settings → Secrets and variables → Actions* |
+| — | — | Desde la spec 008 no hay secrets: la sesión la firma Firebase Authentication. `SESSION_KEY` se borra (tarea T049 de la 008) | — |
+
+Variables públicas del frontend (repositorio `vamosjuntos-frontend`, *Variables* de Actions):
+`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` y
+`VITE_FIREBASE_APP_ID` (spec 008).
 
 El catálogo de invitados ya no es un secret (enmienda v2.0.0). Vive en Firestore,
 `events/{EVENT_ID}/users`, con las reglas de
@@ -63,7 +67,6 @@ lo lee el backend con `vamosjuntos-backend-run`.
 - Llegan a Cloud Run como variables de entorno y se ven en la configuración de la revisión. Solo
   los ve quien tiene acceso al proyecto.
 - Cambiar un secret en GitHub no afecta a producción hasta la siguiente ejecución del pipeline.
-- Rotar `SESSION_KEY` cierra todas las sesiones.
 
 ## Configuración de ejecución del backend
 
@@ -71,9 +74,8 @@ lo lee el backend con `vamosjuntos-backend-run`.
 |----------|--------|-------|
 | `EVENT_ID` | `env` del workflow | `paseo-familiar-diciembre-2026` |
 | `FIRESTORE_DATABASE` | `env` del workflow | `vamosjuntos-club-db` |
-| `SESSION_KEY` | Secret de GitHub | Ver arriba |
 | `PORT` | Cloud Run | `8080` |
-| `GOOGLE_CLOUD_PROJECT` | No se define | El backend lo detecta en Cloud Run |
+| `GOOGLE_CLOUD_PROJECT` | `env` del workflow (`$PROJECT_ID`) | `vamosjuntos-club`; obligatoria desde la spec 008 (`aud` del ID token) |
 
 ## Ejecución de pipeline
 

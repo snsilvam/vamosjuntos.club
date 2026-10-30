@@ -18,6 +18,10 @@ guardan en los secrets del repositorio en GitHub, sin Secret Manager.
 pipeline; vive en Firestore (`events/{EVENT_ID}/users`) y lo mantiene el responsable a mano. El
 único secreto que el pipeline entrega al backend es la llave de sesión.
 
+**Enmienda 2026-10-30 (constitución v3.0.0, spec 008)**: la sesión la firma Firebase
+Authentication, así que el backend ya no recibe ningún secreto. El frontend recibe la
+configuración web de Firebase, que es pública, como variables de repositorio de GitHub.
+
 ## User Scenarios & Testing *(mandatory)*
 
 El actor de esta feature es el responsable del proyecto (quien desarrolla y publica la app).
@@ -103,7 +107,7 @@ comportamiento anterior.
   publicada la versión del último commit.
 - Falla la conexión con la nube a mitad del despliegue: la versión anterior sigue sirviendo y la
   ejecución queda fallida; se puede relanzar manualmente.
-- Falta un secreto requerido (la llave de sesión): el despliegue falla antes de publicar y la
+- Falta la configuración web de Firebase del frontend: el despliegue falla antes de publicar y la
   versión anterior sigue en producción.
 - El catálogo de invitados en Firestore es inválido: la nueva versión no arranca, el despliegue
   falla y la versión anterior sigue en producción.
@@ -131,7 +135,8 @@ comportamiento anterior.
   (`vamosjuntos.club`).
 - **FR-009**: Los pipelines MUST autenticarse en la nube sin llaves de larga duración guardadas
   en el repositorio ni en los secretos de la plataforma.
-- **FR-010**: La llave de sesión MUST llegar al backend desde un almacén de secretos (los secrets
+- **FR-010**: Si algún pipeline necesita un secreto (desde la spec 008, ninguno), MUST llegar desde
+  un almacén de secretos (los secrets
   del repositorio en GitHub). Ni ella ni los códigos de invitación (que viven en Firestore) MUST
   aparecer en los repositorios, en los archivos de pipeline ni en los logs de las ejecuciones.
 - **FR-011**: Los despliegues de un mismo repositorio MUST ejecutarse de uno en uno; si llega un
@@ -144,7 +149,7 @@ comportamiento anterior.
 - **Ejecución de pipeline**: un intento de validar y publicar un commit; tiene repositorio, commit,
   resultado (exitosa o fallida) y fecha.
 - **Ambiente de producción**: el único ambiente de la V1, donde la familia usa la app.
-- **Secreto**: un dato sensible (la llave de sesión) que se inyecta al publicar y nunca se
+- **Secreto**: un dato sensible que se inyecta al publicar (desde la spec 008 no hay ninguno) y nunca se
   versiona. Los códigos de invitación no pasan por el pipeline.
 
 ## Success Criteria *(mandatory)*

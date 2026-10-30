@@ -125,6 +125,11 @@ Los flags exactos están en [contracts/pipelines.md](contracts/pipelines.md#clou
 
 ## R6. Secretos: GitHub → variables de entorno de Cloud Run
 
+> **Actualización (spec 008)**: con Firebase Authentication la sesión la firma Google y
+> `SESSION_KEY` desaparece. El backend queda sin secrets, y su workflow pasa
+> `GOOGLE_CLOUD_PROJECT=$PROJECT_ID` en lugar de la llave. El frontend recibe la configuración web
+> de Firebase como `vars.VITE_FIREBASE_*`. El resto de esta sección queda como historia.
+
 **Decisión** (actualizada por la enmienda v2.0.0, que movió el catálogo a Firestore):
 - **Dónde vive**: `SESSION_KEY` es el único repository secret de `snsilvam/vamosjuntos-backend`.
   El responsable lo crea en *Settings → Secrets and variables → Actions*.

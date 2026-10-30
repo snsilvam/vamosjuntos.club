@@ -22,12 +22,16 @@ alcance cerrado es lo que permite llegar a tiempo.
 
 ### II. Acceso Solo por Invitación
 
-- Todo flujo de la aplicación, salvo el propio onboarding, MUST exigir un usuario con sesión
-  activa que esté invitado al evento. El backend MUST validarlo en cada request; ocultar
-  pantallas en el frontend no cuenta como control de acceso.
-- El onboarding MUST seguir este orden: (1) el usuario selecciona su nombre de la lista de
-  invitados, (2) ingresa su código de invitación, (3) el sistema le pregunta si confirma
-  asistencia. Si confirma, su nombre MUST dejar de aparecer en la lista de onboarding.
+- Los usuarios MUST autenticarse con **Firebase Authentication** (Google o correo y
+  contraseña). Todo flujo de la aplicación, salvo el inicio de sesión y el onboarding, MUST
+  exigir un usuario autenticado y vinculado a un invitado del evento. El backend MUST validarlo
+  en cada request verificando el ID token de Firebase; ocultar pantallas en el frontend no cuenta
+  como control de acceso.
+- El ingreso MUST seguir este orden: (1) el usuario inicia sesión con Firebase Authentication;
+  (2) la primera vez, selecciona su nombre de la lista de invitados; (3) ingresa su código de
+  invitación, que vincula su cuenta con ese invitado una sola vez; (4) el sistema le pregunta si
+  confirma asistencia. Si confirma, su nombre MUST dejar de aparecer en la lista de onboarding.
+  Las siguientes veces MUST bastar con iniciar sesión con la cuenta vinculada.
 - La lista de invitados y sus códigos MUST provenir de Firestore (`events/{EVENT_ID}/users`, un
   documento por invitado). Solo el backend los lee, con su cuenta de servicio. Las reglas de
   seguridad de Firestore MUST negar todo acceso desde clientes. Los códigos reales MUST NOT
@@ -111,6 +115,7 @@ alcance cerrado es lo que permite llegar a tiempo.
 | Base de datos | Google Cloud Firestore (modo nativo) |
 | Hosting backend | Cloud Run |
 | Hosting frontend | Firebase Hosting (mismo proyecto de GCP) |
+| Autenticación | Firebase Authentication (Google y correo/contraseña); el backend verifica el ID token |
 | Despliegue | GitHub Actions: backend → Cloud Run, frontend → Firebase Hosting |
 
 **Hosting del frontend: Firebase Hosting.** Elegido sobre Cloud Storage + Load Balancer y sobre
@@ -122,11 +127,14 @@ un contenedor estático en Cloud Run porque:
   origen: sin CORS y con cookies de primera parte.
 
 Restricción derivada: Firebase Hosting solo reenvía a Cloud Run la cookie llamada `__session`.
-Si la sesión se implementa con cookie, MUST usar ese nombre.
+La sesión la mantiene Firebase Authentication en el navegador, y el frontend envía el ID token en
+el encabezado `Authorization` de cada llamada a `/api/**`. Si alguna vez se usa una cookie, MUST
+llamarse `__session`.
 
 **Configuración y secretos:** la lista de invitados y sus códigos viven en Firestore
-(Principio II). La configuración del backend y la llave de sesión llegan por variables de
-entorno de Cloud Run. Ningún secreto se versiona.
+(Principio II). La configuración del backend llega por variables de entorno de Cloud Run. La
+configuración web de Firebase (`apiKey`, `authDomain`, `projectId`, `appId`) es pública por diseño
+y no se trata como secreto. Ningún secreto se versiona.
 
 ### Despliegue Continuo
 
@@ -197,4 +205,4 @@ alcance.
   que no haya código sombra, que los errores sigan el Principio V, que el backend pase
   `gofmt`, `go vet` y `golangci-lint`, y que los pipelines cumplan "Despliegue Continuo".
 
-**Version**: 2.0.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30
+**Version**: 3.0.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30
