@@ -10,8 +10,9 @@ específicos. La V1 cubre exclusivamente el "Paseo Familiar Diciembre 2026".
 
 - El sistema MUST manejar un único evento fijo: **"Paseo Familiar Diciembre 2026"**. No se
   construyen catálogos, CRUD ni pantallas de administración de eventos en la V1.
-- El evento MUST leerse desde la colección `events` de Firestore. El documento lo crea el
-  responsable del proyecto a mano; la aplicación MUST NOT crear ni editar eventos.
+- El evento MUST leerse desde la colección `events` de Firestore, y su lista de invitados desde
+  la subcolección `events/{EVENT_ID}/users`. El responsable del proyecto crea y mantiene ambos a
+  mano; la aplicación MUST NOT crear ni editar eventos ni invitados.
 - Cada evento MUST admitir como máximo **25 usuarios**. Ningún flujo puede superar ese tope.
 - Los módulos permitidos en la V1 son exactamente los listados en "Dominio de la V1". Cualquier
   otro módulo requiere enmendar esta constitución.
@@ -27,8 +28,10 @@ alcance cerrado es lo que permite llegar a tiempo.
 - El onboarding MUST seguir este orden: (1) el usuario selecciona su nombre de la lista de
   invitados, (2) ingresa su código de invitación, (3) el sistema le pregunta si confirma
   asistencia. Si confirma, su nombre MUST dejar de aparecer en la lista de onboarding.
-- La lista de invitados y sus códigos MUST provenir de variables de entorno del backend. Los
-  códigos reales MUST NOT versionarse en ningún repositorio (incluido este).
+- La lista de invitados y sus códigos MUST provenir de Firestore (`events/{EVENT_ID}/users`, un
+  documento por invitado). Solo el backend los lee, con su cuenta de servicio. Las reglas de
+  seguridad de Firestore MUST negar todo acceso desde clientes. Los códigos reales MUST NOT
+  versionarse en ningún repositorio (incluido este) ni salir del backend en respuestas o logs.
 
 **Razón:** la app maneja datos de una familia; nadie fuera de la lista debe poder entrar.
 
@@ -121,9 +124,9 @@ un contenedor estático en Cloud Run porque:
 Restricción derivada: Firebase Hosting solo reenvía a Cloud Run la cookie llamada `__session`.
 Si la sesión se implementa con cookie, MUST usar ese nombre.
 
-**Configuración y secretos:** la lista de invitados y sus códigos llegan al backend por
-variables de entorno de Cloud Run (pueden referenciar Secret Manager). Ningún secreto se
-versiona.
+**Configuración y secretos:** la lista de invitados y sus códigos viven en Firestore
+(Principio II). La configuración del backend y la llave de sesión llegan por variables de
+entorno de Cloud Run. Ningún secreto se versiona.
 
 ### Despliegue Continuo
 
@@ -162,8 +165,8 @@ Estas reglas son inmutables para la V1; cambiarlas requiere enmendar esta consti
 **Catálogo de invitados (22 + hasta 3 nuevos = 25):** Carmencita, Guillermito, Maidecita,
 Alisson, Estiben, Liam, Mafe, Janneth, Orlando, Melissa, Samuel, Sergio, Heidy, Maria, Luis,
 Sebastián, Alejandro, El Fercho, Lorena, papá de lore, mamá de lore, Nicolás López.
-Cada invitado tiene un código de confirmación propio, inyectado por variable de entorno con la
-forma `[["Nombre","código"], ...]`. Este documento no contiene los códigos reales.
+Cada invitado es un documento de `events/{EVENT_ID}/users` con los campos `Nombre` y `código`
+(su código de confirmación propio). Este documento no contiene los códigos reales.
 
 **Funcionalidades permitidas en la V1 (y solo estas):**
 - **Onboarding:** según el Principio II.
@@ -194,4 +197,4 @@ alcance.
   que no haya código sombra, que los errores sigan el Principio V, que el backend pase
   `gofmt`, `go vet` y `golangci-lint`, y que los pipelines cumplan "Despliegue Continuo".
 
-**Version**: 1.2.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30
+**Version**: 2.0.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30

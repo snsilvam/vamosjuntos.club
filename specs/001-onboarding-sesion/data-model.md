@@ -21,25 +21,38 @@ entorno (sugerido: `paseo-familiar-diciembre-2026`). La app solo lo lee.
 Si el documento no existe o le falta un campo obligatorio, las operaciones de onboarding
 responden `404 event_not_found` (FR-004).
 
-## Invitado — variable de entorno `GUESTS_JSON` (no se guarda en Firestore)
+## Invitado — Firestore `events/{EVENT_ID}/users/{guestId}`
 
-```text
-[["Carmencita","<código>"], ["Guillermito","<código>"], ...]
-```
+> Enmienda de la constitución v2.0.0: antes venía de la variable de entorno `GUESTS_JSON`.
 
-| Atributo | Origen | Regla |
-|----------|--------|-------|
-| `id` | slug del nombre | único; minúsculas, sin tildes ni eñes, espacios → `-` |
-| `name` | posición 0 | no vacío |
-| `code` | posición 1 | ≥ 6 caracteres tras recortar espacios; único sin distinguir mayúsculas y minúsculas (FR-016) |
+Lo crea y edita el organizador a mano en la consola de Firestore, un documento por invitado. La
+app solo lo lee.
 
-**Validaciones al arrancar** (si alguna falla, el proceso termina con error):
+| Campo / atributo | Tipo | Regla |
+|------------------|------|-------|
+| id del documento | string | Es el `guestId` de la app (sesión, `attendance`, rutas). Firestore lo genera; no cambia aunque se edite el nombre |
+| `Nombre` | string | No vacío tras recortar espacios. Es el nombre visible en la lista |
+| `código` | string | Al menos 6 caracteres tras recortar espacios; único sin distinguir mayúsculas y minúsculas (FR-016) |
 
-- Máximo 25 invitados (FR-013) y como máximo `capacity` del evento.
-- Ningún código repetido, ningún código corto y ningún `id` repetido.
+Cualquier otro campo del documento (p. ej. `confirmado`) se ignora: la asistencia vive en
+`attendance`.
+
+**Lectura**: el backend lee la subcolección completa (≤ 25 documentos) en cada request que usa
+el catálogo, para que los cambios del organizador apliquen de inmediato (FR-001). Luego valida:
+
+- Al menos 1 invitado y como máximo 25 (FR-013).
+- Ningún nombre vacío, ningún código corto y ningún código repetido (FR-016).
+
+**Si la validación falla**: al arrancar, el proceso termina con error y Cloud Run no publica la
+revisión. Con el servicio ya en marcha, la operación responde `500 internal_error` y el motivo
+queda en el log. Además, al arrancar el catálogo debe caber en `capacity` del evento, si existe.
 
 **Comparación de códigos** (FR-003): `strings.EqualFold(strings.TrimSpace(input), code)`.
-Los códigos nunca salen del backend ni se escriben en Firestore ni en los logs.
+
+**Protección de los códigos**:
+- Las reglas de Firestore de `vamosjuntos-club-db` niegan todo acceso desde clientes
+  (`allow read, write: if false`); solo el backend los lee, con su cuenta de servicio.
+- Nunca salen en respuestas ni en logs; los mensajes de error nombran invitados, no códigos.
 
 ## Respuesta de asistencia — Firestore `events/{EVENT_ID}/attendance/{guestId}`
 

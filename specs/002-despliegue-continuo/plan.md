@@ -19,7 +19,8 @@ Enfoque técnico: **la misma estructura de `kaizen-app`**, por decisión del res
 - Un solo job por workflow.
 - WIF con una cuenta de servicio y un proveedor por repo.
 - Docker hacia Artifact Registry y `gcloud run deploy`.
-- Secretos en los secrets del repo de GitHub, pasados a Cloud Run como variables de entorno.
+- El único secreto, `SESSION_KEY`, en los secrets del repo de GitHub, pasado a Cloud Run como
+  variable de entorno. El catálogo vive en Firestore.
 
 Sobre esa base se agrega solo lo que la spec exige:
 
@@ -46,8 +47,9 @@ las mismas versiones del desarrollo local.
 
 **Storage**:
 - Artifact Registry guarda las imágenes del backend.
-- Los secrets del repo `vamosjuntos-backend` guardan `GUESTS_JSON` y `SESSION_KEY`.
-- Firestore (`vamosjuntos-club-db`) no cambia.
+- Los secrets del repo `vamosjuntos-backend` guardan `SESSION_KEY`.
+- Firestore (`vamosjuntos-club-db`) guarda el catálogo en `events/{EVENT_ID}/users` (spec 001,
+  enmienda v2.0.0); el pipeline no lo toca.
 
 **Testing**: el pipeline del backend ejecuta `go test` y el del frontend, el build. La validación
 de los pipelines es manual con [quickstart.md](quickstart.md).
@@ -65,7 +67,6 @@ de los pipelines es manual con [quickstart.md](quickstart.md).
 **Constraints**:
 - Sin llaves JSON de cuentas de servicio.
 - Ningún código de invitación en repos, archivos de workflow ni logs.
-- Los códigos no pueden contener `;`, que es el separador de `--set-env-vars` (R6).
 - Un solo ambiente y la cookie `__session`.
 - Una región que admita los rewrites de Hosting hacia Cloud Run.
 
@@ -90,7 +91,7 @@ y los secretos se guardan en los secrets de GitHub.
 | Principio | Verificación | Estado |
 |-----------|--------------|--------|
 | I. Alcance cerrado | No agrega funciones a la app; un solo ambiente: producción. | ✅ |
-| II. Acceso por invitación | El catálogo y los códigos viven solo en los secrets del repo del backend y en la configuración de Cloud Run. Nunca están en archivos versionados, y GitHub los enmascara en los logs. Hosting y la API comparten dominio, así que la cookie `__session` sigue siendo de primera parte. | ✅ |
+| II. Acceso por invitación | El catálogo y los códigos viven en Firestore (constitución v2.0.0) y nunca pasan por el pipeline. `SESSION_KEY` vive en los secrets del repo del backend y GitHub la enmascara en los logs. Hosting y la API comparten dominio, así que la cookie `__session` sigue siendo de primera parte. | ✅ |
 | III. Simplicidad | La estructura de kaizen: un workflow y un job por repo, `gcloud` y `firebase-tools` directos, sin IaC y sin Secret Manager. | ✅ |
 | IV. Compuertas | Backend: `gofmt`, `go vet`, `golangci-lint` y `go test` antes de construir la imagen. Frontend: `npm run build` (`tsc -b && vite build`). Si algo falla, el job se detiene antes de pedir credenciales de nube. | ✅ |
 | V. Errores y HTTP | No cambia contratos. El `no-store` de la spec 001 evita que el CDN guarde respuestas de la API. | ✅ |

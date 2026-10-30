@@ -6,7 +6,8 @@
 
 **Status**: Draft
 
-**Input**: Derivado de la constitución v1.1.0 (Principio II y "Dominio de la V1"): "Todo usuario
+**Input**: Derivado de la constitución v1.1.0 (Principio II y "Dominio de la V1"), enmendada en la
+v2.0.0: "Todo usuario
 nuevo debe seleccionar su nombre de la lista, ingresar su código de invitación del evento y
 confirmar asistencia; si confirma, se oculta de la lista de onboarding. Todo flujo en la app exige
 un usuario con sesión activa e invitado a un evento."
@@ -21,6 +22,9 @@ un usuario con sesión activa e invitado a un evento."
   sale de la lista de onboarding y no entra a la app.
 - Q: ¿Puede alguien confirmar la asistencia de otro invitado? → A: Sí, escribiendo el código de
   esa persona; después también puede reservarle cupo de transporte.
+- Q: ¿Dónde vive el catálogo de invitados? (enmienda de la constitución v2.0.0, pedida por el
+  responsable) → A: En la base de datos del evento: un registro por invitado con nombre y código,
+  que el organizador crea y edita a mano. Ya no viene de la configuración del servidor.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -177,18 +181,21 @@ es accesible desde ese dispositivo.
 - Muchos intentos fallidos de código: se bloquean temporalmente los intentos (FR-010).
 - Todos los invitados ya respondieron: la lista se muestra vacía con un mensaje y la opción de
   reingreso.
-- El catálogo configurado supera 25 invitados, tiene códigos repetidos o códigos de menos de 6
-  caracteres: el sistema no inicia y registra el error para el organizador; ningún invitado ve un
-  error técnico.
+- El catálogo supera 25 invitados, tiene códigos repetidos, códigos de menos de 6 caracteres o
+  un invitado sin nombre: si ocurre al arrancar, el sistema no inicia; si ocurre por una edición
+  posterior, las operaciones que usan el catálogo responden con el mensaje amigable genérico.
+  En ambos casos el error queda registrado para el organizador y ningún invitado ve un error
+  técnico.
 - Se agrega un invitado nuevo al catálogo (hasta completar 25): aparece en la lista de pendientes
-  sin afectar a los demás.
+  de inmediato, sin volver a publicar la app y sin afectar a los demás.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema MUST mostrar la lista de invitados tomada del catálogo que configura el
-  organizador fuera de la app. La app MUST NOT permitir agregar, editar ni borrar invitados.
+- **FR-001**: El sistema MUST mostrar la lista de invitados tomada del catálogo que el
+  organizador mantiene a mano en la base de datos del evento. La app MUST NOT permitir agregar,
+  editar ni borrar invitados, y los cambios del organizador MUST verse sin volver a publicar.
 - **FR-002**: La lista de onboarding MUST mostrar solo los invitados pendientes (ni confirmados ni
   "No asistirá"), en orden alfabético.
 - **FR-003**: Tras elegir un nombre, el sistema MUST pedir el código de invitación propio de ese
@@ -229,8 +236,9 @@ es accesible desde ese dispositivo.
 
 - **Evento**: el "Paseo Familiar Diciembre 2026". Nombre, fecha y hora de inicio y fin, destino,
   lugares de salida y capacidad máxima (25). Lo crea el organizador a mano.
-- **Invitado**: una persona del catálogo. Nombre visible, código de invitación propio y único, y
-  estado de asistencia: pendiente, confirmado o "No asistirá".
+- **Invitado**: una persona del catálogo, registrada a mano por el organizador en la base de datos
+  del evento. Nombre visible, código de invitación propio y único, y estado de asistencia:
+  pendiente, confirmado o "No asistirá".
 - **Respuesta de asistencia**: el registro de que un invitado confirmó o dijo que no asistirá, con
   fecha y hora, y quién la registró (el propio invitado u otro invitado).
 - **Sesión**: el acceso activo de un invitado confirmado en un dispositivo, con vencimiento.
@@ -259,8 +267,8 @@ es accesible desde ese dispositivo.
 - El organizador elige códigos difíciles de adivinar (no secuenciales como "codigo 1", "codigo 2")
   y los entrega personalmente (por ejemplo, por WhatsApp); la app no envía ni recupera códigos.
   Quien olvide su código se lo pide al organizador.
-- Los 3 cupos restantes (hasta 25) los agrega el organizador al catálogo configurado; no hay
-  registro de usuarios nuevos dentro de la app.
+- Los 3 cupos restantes (hasta 25) los agrega el organizador directamente en la base de datos;
+  no hay registro de usuarios nuevos dentro de la app.
 - Hay un único evento en la V1, así que no existe un paso de "elegir evento".
 - El reingreso de un invitado "No asistirá" para cambiar de opinión no rompe el orden del
   onboarding de la constitución: esa persona ya pasó por la selección de nombre y el código.

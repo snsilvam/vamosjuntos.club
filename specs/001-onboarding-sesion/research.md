@@ -32,6 +32,10 @@ Cada decisión resuelve una incógnita del Technical Context de [plan.md](plan.m
 
 ## R3. Catálogo de invitados e identificador estable
 
+> **Reemplazada por R12** (enmienda de la constitución v2.0.0): el catálogo ya no viene de
+> `GUESTS_JSON` sino de Firestore, y el `guestId` es el id del documento. Se conserva el texto
+> original como historia.
+
 - **Decision**: la variable de entorno `GUESTS_JSON` contiene `[["Nombre","código"], ...]`. Al
   arrancar, el backend la parsea y la valida: máximo 25 invitados, códigos únicos sin distinguir
   mayúsculas y minúsculas tras recortar espacios, mínimo 6 caracteres e IDs únicos. Si algo falla,
@@ -146,3 +150,35 @@ Cada decisión resuelve una incógnita del Technical Context de [plan.md](plan.m
   eventos (Principio I). Se usa un `GUESTS_JSON` local con códigos de prueba, nunca los
   reales.
 - **Rationale**: permite probar todo el flujo sin tocar producción ni versionar secretos.
+
+## R12. Catálogo en Firestore (enmienda de la constitución v2.0.0)
+
+- **Decision**: el catálogo vive en `events/{EVENT_ID}/users`, un documento por invitado con los
+  campos `Nombre` y `código`, tal como los creó el organizador en la consola.
+  - El `guestId` es el id del documento, generado por Firestore. Ya no hay *slug*.
+  - Un `GuestStore` lee la subcolección completa (≤ 25 documentos) en cada request que usa el
+    catálogo y la pasa por la misma validación pura de antes (`newCatalog`): 1 a 25 invitados,
+    nombres no vacíos, códigos de 6 o más caracteres y únicos sin distinguir mayúsculas.
+  - `main` también la lee y valida al arrancar: si es inválida, sale con error y Cloud Run
+    mantiene la revisión anterior.
+  - Con el servicio en marcha, un catálogo inválido hace responder `500 internal_error` y el
+    motivo queda en el log, sin códigos.
+  - Otros campos del documento (como `confirmado`) se ignoran, porque la asistencia vive en
+    `attendance`.
+- **Rationale**: es el pedido del responsable. Así puede agregar o corregir invitados en la consola
+  de Firestore sin volver a desplegar, y el catálogo deja de pasar por GitHub y por la
+  configuración de Cloud Run.
+  - Leer en cada request es lo más simple y siempre está al día. Cuesta unas 25 lecturas por
+    request, unos centavos durante todo el paseo.
+  - El id del documento no cambia si se corrige un nombre, así que no rompe sesiones ni
+    respuestas guardadas.
+  - Las reglas de Firestore de la base ya niegan todo acceso desde clientes (verificado: una
+    lectura sin credenciales responde 403), así que solo el backend puede leer los códigos.
+- **Alternatives considered**:
+  - Leer solo al arrancar: un invitado nuevo no aparecería hasta un nuevo despliegue.
+  - Caché con vencimiento: menos lecturas, pero agrega estado compartido y un mutex sin
+    necesidad real.
+  - Usar `confirmado` del documento como estado de asistencia: no puede representar "No
+    asistirá" ni quién respondió, y duplicaría `attendance`.
+  - Guardar el código con hash: los códigos son cortos y el organizador necesita leerlos para
+    entregarlos.

@@ -26,7 +26,7 @@ Solo se cambia lo que exige la spec o la constitución.
 | Cuentas `github-actions-cloud-run` y `github-actions-frontend` | Igual | R3 |
 | `setup-gcloud` + `configure-docker` + `docker build/push` | Igual | R4 |
 | Repositorio de Artifact Registry `containers` | Igual | |
-| Paso que valida que existan los secrets (`test -n ... \|\| exit 1`) | Igual, para `GUESTS_JSON` y `SESSION_KEY` | Caso borde "falta un secreto" |
+| Paso que valida que existan los secrets (`test -n ... \|\| exit 1`) | Igual, para `SESSION_KEY` | Caso borde "falta un secreto" |
 | `gcloud run deploy` con `--set-env-vars "^;^..."` desde `secrets.*` | Igual | R6 |
 | `--region us-central1 --platform managed --allow-unauthenticated --port 8080` | Igual | R5 |
 | Dockerfile multi-etapa golang-alpine → distroless | Igual, con `static-debian12:nonroot` | El binario es estático y corre sin root |
@@ -110,7 +110,7 @@ Los flags exactos están en [contracts/pipelines.md](contracts/pipelines.md#clou
 
 **Razón**:
 - **Si el arranque falla, no se publica**: Cloud Run solo mueve el tráfico cuando la revisión
-  nueva arranca. Si `GUESTS_JSON` o `SESSION_KEY` son inválidos, el proceso termina con su mensaje
+  nueva arranca. Si `SESSION_KEY` o el catálogo de Firestore son inválidos, el proceso termina con su mensaje
   (spec 001), el despliegue falla y la revisión anterior sigue sirviendo (FR-006).
 - **Acceso público**: `--allow-unauthenticated` hace falta porque Hosting invoca al servicio como
   cliente público.
@@ -125,41 +125,39 @@ Los flags exactos están en [contracts/pipelines.md](contracts/pipelines.md#clou
 
 ## R6. Secretos: GitHub → variables de entorno de Cloud Run
 
-**Decisión**:
-- **Dónde viven**: `GUESTS_JSON` y `SESSION_KEY` son repository secrets de
-  `snsilvam/vamosjuntos-backend`, que el responsable crea en *Settings → Secrets and variables →
-  Actions*.
-- **Validación previa**: un paso, como el de `DATABASE_URL` en kaizen, falla si alguno está vacío.
-- **Cómo llegan a Cloud Run**: en el paso de despliegue, los secrets entran como variables de
-  entorno del paso, y `gcloud run deploy` los pasa con el separador `^;^`:
+**Decisión** (actualizada por la enmienda v2.0.0, que movió el catálogo a Firestore):
+- **Dónde vive**: `SESSION_KEY` es el único repository secret de `snsilvam/vamosjuntos-backend`.
+  El responsable lo crea en *Settings → Secrets and variables → Actions*.
+- **Validación previa**: un paso, como el de `DATABASE_URL` en kaizen, falla si está vacío.
+- **Cómo llega a Cloud Run**: entra como variable de entorno del paso de despliegue, y
+  `gcloud run deploy` la pasa con el separador `^;^` de kaizen:
 
   ```text
-  --set-env-vars "^;^EVENT_ID=$EVENT_ID;FIRESTORE_DATABASE=$FIRESTORE_DATABASE;GUESTS_JSON=$GUESTS_JSON;SESSION_KEY=$SESSION_KEY"
+  --set-env-vars "^;^EVENT_ID=$EVENT_ID;FIRESTORE_DATABASE=$FIRESTORE_DATABASE;SESSION_KEY=$SESSION_KEY"
   ```
 
 - **Variables no secretas**: `EVENT_ID=paseo-familiar-diciembre-2026` y
-  `FIRESTORE_DATABASE=vamosjuntos-club-db` van en el `env` del workflow. `GOOGLE_CLOUD_PROJECT` no
-  hace falta, porque el backend lo detecta en Cloud Run.
+  `FIRESTORE_DATABASE=vamosjuntos-club-db` van en el `env` del workflow.
+- **El catálogo**: lo lee el backend de `events/{EVENT_ID}/users` con su cuenta de ejecución
+  (`roles/datastore.user`). El pipeline no lo ve.
 
 **Razón**:
-- Es el patrón de kaizen y cumple la constitución v1.2.0 y FR-010.
-- Los códigos nunca están en archivos versionados, y GitHub los reemplaza por `***` en los logs.
-- El separador `^;^` evita que las comas del JSON se tomen como separadores de variables.
+- Es el patrón de kaizen y cumple la constitución v2.0.0 y FR-010.
+- GitHub reemplaza la llave por `***` en los logs, y los códigos ni siquiera pasan por GitHub.
 
-**Consecuencias que el responsable acepta**:
-- **Los códigos no pueden contener `;`**: los partiría el separador. Los códigos alfanuméricos
-  bastan.
-- **Las variables se ven en texto plano en la consola de Cloud Run**: cualquiera con acceso al
-  proyecto (hoy, solo el responsable) puede verlas en la revisión.
-- **Cambiar el catálogo**: se edita el secret en GitHub y se usa "Run workflow" (FR-003).
-- **Rotar `SESSION_KEY`**: se hace igual, y se cierran todas las sesiones.
+**Consecuencias**:
+- **La llave se ve en texto plano en la configuración de Cloud Run**: solo quien tiene acceso al
+  proyecto (hoy, el responsable).
+- **Cambiar el catálogo**: se edita en la consola de Firestore. No hace falta desplegar.
+- **Rotar `SESSION_KEY`**: se edita el secret y se usa "Run workflow". Se cierran todas las
+  sesiones.
 - **Nunca usar `set -x`** en los pasos que reciben secretos.
 
 **Alternativas**:
+- **`GUESTS_JSON` como secret de GitHub**: era el diseño anterior; lo reemplazó la enmienda
+  v2.0.0. Obligaba a desplegar para cada cambio de invitados y a que los códigos no tuvieran `;`.
 - **Secret Manager con `--set-secrets`**: el responsable lo descartó para mantener la estructura de
   kaizen.
-- **`--env-vars-file` generado en el runner**: evita la restricción del `;`, pero escribe los
-  secretos en un archivo y se aleja de kaizen.
 
 ## R7. Compuertas de calidad
 

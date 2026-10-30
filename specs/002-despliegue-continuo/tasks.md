@@ -38,8 +38,8 @@ Reglas que aplican a todas las tareas:
   `gcloud run deploy`. Referencia:
   - `C:\golang\kaizen-app\kaizensnsilvam-backend\.github\workflows\backend-deploy.yml`;
   - `C:\golang\kaizen-app\front-kaizensnsilvam.com\.github\workflows\front-deploy.yml`.
-- **Secretos**: `GUESTS_JSON` y `SESSION_KEY` solo aparecen como `${{ secrets.X }}` en el `env`
-  del paso que los usa. Nunca se imprimen, nunca se usa `set -x` y nunca se escriben en archivos
+- **Secretos**: `SESSION_KEY` solo aparece como `${{ secrets.SESSION_KEY }}` en el `env` del paso
+  que la usa (enmienda v2.0.0: el catálogo vive en Firestore). Nunca se imprimen, nunca se usa `set -x` y nunca se escriben en archivos
   versionados.
 - **Etiquetas en las tareas**:
   - **(responsable)**: la hace el responsable, porque requiere la consola, GitHub o los códigos
@@ -66,26 +66,23 @@ fases 3 y 4.
 
 **⚠️ CRITICAL**: ningún push a `production` antes de terminar esta fase.
 
-- [ ] T003 (visto bueno) Habilitar las APIs de §1.1 en `vamosjuntos-club`: `run`, `artifactregistry`, `iam`, `iamcredentials`, `sts`, `cloudresourcemanager`, `firebase` y `firebasehosting`
-- [ ] T004 (responsable) Agregar Firebase al proyecto existente `vamosjuntos-club` desde la consola y crear el sitio de Hosting por defecto `vamosjuntos-club` (§1.2) (depende de T003)
-- [ ] T005 [P] (visto bueno) Crear el repositorio Docker `containers` de Artifact Registry en `us-central1` (§1.3) (depende de T003)
-- [ ] T006 [P] (visto bueno) Crear la cuenta `vamosjuntos-backend-run` y darle `roles/datastore.user` en el proyecto (§1.4) (depende de T003)
-- [ ] T007 [P] (visto bueno) Crear el pool `github-pool` y los proveedores OIDC `github-provider` (`assertion.repository == 'snsilvam/vamosjuntos-backend' && assertion.ref == 'refs/heads/production'`) y `github-frontend-provider` (lo mismo para `snsilvam/vamosjuntos-frontend`), con el mapeo de §1.5 (depende de T003)
-- [ ] T008 (visto bueno) Crear `github-actions-cloud-run` con los roles de §1.6 (depende de T005, T006 y T007):
+- [X] T003 (visto bueno) Habilitar las APIs de §1.1 en `vamosjuntos-club`: `run`, `artifactregistry`, `iam`, `iamcredentials`, `sts`, `cloudresourcemanager`, `firebase` y `firebasehosting`
+- [X] T004 (responsable) Agregar Firebase al proyecto existente `vamosjuntos-club` desde la consola y crear el sitio de Hosting por defecto `vamosjuntos-club` (§1.2) (depende de T003)
+- [X] T005 [P] (visto bueno) Crear el repositorio Docker `containers` de Artifact Registry en `us-central1` (§1.3) (depende de T003)
+- [X] T006 [P] (visto bueno) Crear la cuenta `vamosjuntos-backend-run` y darle `roles/datastore.user` en el proyecto (§1.4) (depende de T003)
+- [X] T007 [P] (visto bueno) Crear el pool `github-pool` y los proveedores OIDC `github-provider` (`assertion.repository == 'snsilvam/vamosjuntos-backend' && assertion.ref == 'refs/heads/production'`) y `github-frontend-provider` (lo mismo para `snsilvam/vamosjuntos-frontend`), con el mapeo de §1.5 (depende de T003)
+- [X] T008 (visto bueno) Crear `github-actions-cloud-run` con los roles de §1.6 (depende de T005, T006 y T007):
   - `roles/iam.workloadIdentityUser` para el `principalSet` de `snsilvam/vamosjuntos-backend`;
   - `roles/run.admin` en el proyecto;
   - `roles/artifactregistry.writer` en `containers`;
   - `roles/iam.serviceAccountUser` sobre `vamosjuntos-backend-run`.
-- [ ] T009 (visto bueno) Crear `github-actions-frontend` con los roles de §1.6 (depende de T004 y T007):
+- [X] T009 (visto bueno) Crear `github-actions-frontend` con los roles de §1.6 (depende de T004 y T007):
   - `roles/iam.workloadIdentityUser` para el `principalSet` de `snsilvam/vamosjuntos-frontend`;
   - `roles/firebasehosting.admin`, `roles/run.viewer`, `roles/serviceusage.apiKeysViewer` y
     `roles/serviceusage.serviceUsageConsumer` en el proyecto.
-- [ ] T010 (responsable) Crear en `snsilvam/vamosjuntos-backend` los repository secrets `GUESTS_JSON` y `SESSION_KEY` (§1.7):
-  - `GUESTS_JSON`: catálogo real en una línea, con 25 invitados como máximo, códigos únicos de 6 o
-    más caracteres y **ningún código con `;`**;
-  - `SESSION_KEY`: salida de `openssl rand -base64 32`.
-- [ ] T011 (responsable) Crear el documento `events/paseo-familiar-diciembre-2026` en la base `vamosjuntos-club-db` (quickstart de 001, §4)
-- [ ] T012 Verificar la configuración con `gcloud` (depende de T003 a T009):
+- [ ] T010 (responsable) Crear en `snsilvam/vamosjuntos-backend` el repository secret `SESSION_KEY` con la salida de `openssl rand -base64 32` (§1.7). Si ya se creó `GUESTS_JSON`, borrarlo: el catálogo vive en Firestore (enmienda v2.0.0)
+- [X] T011 (responsable) Crear el documento `events/paseo-familiar-diciembre-2026` en la base `vamosjuntos-club-db` (quickstart de 001, §4)
+- [X] T012 Verificar la configuración con `gcloud` (depende de T003 a T009):
   - `artifacts repositories describe containers`;
   - `iam service-accounts list`;
   - `iam workload-identity-pools providers list --workload-identity-pool=github-pool`;
@@ -124,7 +121,7 @@ fases 3 y 4.
   5. `golangci/golangci-lint-action@v9` con `version: v2.15.0`;
   6. `go test ./...`.
 - [X] T017 [US1] Agregar a vamosjuntos-backend/.github/workflows/backend-deploy.yml los pasos de publicación (depende de T016):
-  1. "Validar secrets": `test -n` sobre `GUESTS_JSON` y `SESSION_KEY` desde `secrets.*`, con un mensaje que solo nombra el secret faltante;
+  1. "Validar secrets": `test -n` sobre `SESSION_KEY` desde `secrets.*`, con un mensaje que solo nombra el secret faltante (antes también `GUESTS_JSON`; lo quitó la enmienda v2.0.0);
   2. `google-github-actions/auth@v3` con `workload_identity_provider: projects/54833988307/locations/global/workloadIdentityPools/github-pool/providers/github-provider` y `service_account: github-actions-cloud-run@vamosjuntos-club.iam.gserviceaccount.com`;
   3. `google-github-actions/setup-gcloud@v3`;
   4. `gcloud auth configure-docker us-central1-docker.pkg.dev --quiet`;
@@ -134,12 +131,12 @@ fases 3 y 4.
   - `--allow-unauthenticated`;
   - `--service-account vamosjuntos-backend-run@vamosjuntos-club.iam.gserviceaccount.com`;
   - `--max-instances 2`;
-  - `--set-env-vars "^;^EVENT_ID=$EVENT_ID;FIRESTORE_DATABASE=$FIRESTORE_DATABASE;GUESTS_JSON=$GUESTS_JSON;SESSION_KEY=$SESSION_KEY"`, con los dos secretos en el `env` del paso.
+  - `--set-env-vars "^;^EVENT_ID=$EVENT_ID;FIRESTORE_DATABASE=$FIRESTORE_DATABASE;SESSION_KEY=$SESSION_KEY"`, con el secreto en el `env` del paso.
 - [X] T019 [US1] Revisar vamosjuntos-backend/.github/workflows/backend-deploy.yml con `go run github.com/rhysd/actionlint/cmd/actionlint@latest` y confirmar que `gofmt -l .`, `go vet ./...`, `golangci-lint run` y `go test ./...` pasan en local (depende de T018)
 - [X] T020 [P] [US1] Agregar una sección "Despliegue" a vamosjuntos-backend/README.md que explique:
   - el flujo feature → `main` → `production`;
   - qué hace el pipeline;
-  - los secrets `GUESTS_JSON` y `SESSION_KEY` (sin valores);
+  - el secret `SESSION_KEY` (sin valor) y que los invitados viven en Firestore;
   - cómo relanzar, cambiar el catálogo y revertir (quickstart §4).
 - [X] T021 [US1] Hacer commit de T013 a T020 en la rama `002-despliegue-continuo` del backend
 - [ ] T022 [US1] (visto bueno) Primer despliegue del backend (depende de la Fase 2 y de T021):

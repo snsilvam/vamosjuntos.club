@@ -247,6 +247,24 @@ Task: "T038 HomePage en vamosjuntos-frontend/src/pages/HomePage.tsx"
 
 ---
 
+## Phase 10: Enmienda v2.0.0 — catálogo en Firestore (2026-10-30)
+
+**Purpose**: el responsable pidió que la lista de invitados salga de Firestore
+(`events/{EVENT_ID}/users`, campos `Nombre` y `código`) y no de `GUESTS_JSON`. Diseño en
+[research.md R12](research.md) y [data-model.md](data-model.md).
+
+- [X] T064 Enmendar la constitución a la v2.0.0 (Principios I y II, "Configuración y secretos" y "Dominio de la V1") y alinear spec.md, plan.md, research.md (R12), data-model.md y quickstart.md
+- [X] T065 Reemplazar `parseCatalog` por `newCatalog([]Guest)` en vamosjuntos-backend/catalog.go, con las mismas reglas (1 a 25 invitados, nombre no vacío, código de 6 o más caracteres y único sin distinguir mayúsculas), y quitar `slug`: el `guestId` es el id del documento
+- [X] T066 Agregar `GuestStore.Catalog(ctx)` en vamosjuntos-backend/catalog.go: lee `events/{EVENT_ID}/users` (`guestDoc{Nombre, código}`, ignora otros campos) y valida con `newCatalog`; los errores nombran invitados, nunca códigos
+- [X] T067 Leer el catálogo en cada request mediante la interfaz `guestCatalog` y `loadCatalog` (500 `internal_error` si falla) en vamosjuntos-backend/handlers.go y en `requireSession` de vamosjuntos-backend/session.go
+- [X] T068 Validar el catálogo de Firestore al arrancar en vamosjuntos-backend/main.go (sale con error si es inválido) y quitar `GUESTS_JSON` de vamosjuntos-backend/config.go
+- [X] T069 Ajustar las pruebas: `newCatalog` en vamosjuntos-backend/catalog_test.go; `fakeGuests`, `TestCatalogChangesApplyRightAway` y `TestCatalogUnavailable` en vamosjuntos-backend/handlers_test.go
+- [X] T070 Crear en `vamosjuntos-club-db` los 21 invitados que faltaban, con la forma del ejemplo del responsable (id automático, `Nombre`, `código`). Los códigos son aleatorios de 6 caracteres sin 0/O/1/I/L, generados sin imprimirse
+- [X] T071 Verificar contra el Firestore real: el backend arranca y `GET /api/onboarding/guests` devuelve los 22 pendientes en orden, sin códigos; las reglas de Firestore niegan el acceso sin credenciales (403)
+- [X] T072 Actualizar vamosjuntos-backend/README.md y quitar `GUESTS_JSON` del workflow del backend (spec 002)
+
+---
+
 ## Implementation Strategy
 
 ### MVP First (US1 + US2)

@@ -14,6 +14,10 @@ despliega a producción; las compuertas de calidad deben pasar antes de desplega
 despliega pasa de `main` a `production` (`main` queda como rama de integración), y los secretos se
 guardan en los secrets del repositorio en GitHub, sin Secret Manager.
 
+**Enmienda 2026-10-30 (constitución v2.0.0)**: el catálogo de invitados ya no es un secreto del
+pipeline; vive en Firestore (`events/{EVENT_ID}/users`) y lo mantiene el responsable a mano. El
+único secreto que el pipeline entrega al backend es la llave de sesión.
+
 ## User Scenarios & Testing *(mandatory)*
 
 El actor de esta feature es el responsable del proyecto (quien desarrolla y publica la app).
@@ -99,8 +103,10 @@ comportamiento anterior.
   publicada la versión del último commit.
 - Falla la conexión con la nube a mitad del despliegue: la versión anterior sigue sirviendo y la
   ejecución queda fallida; se puede relanzar manualmente.
-- Falta un secreto requerido (por ejemplo, el catálogo de invitados): el despliegue falla antes de
-  publicar y la versión anterior sigue en producción.
+- Falta un secreto requerido (la llave de sesión): el despliegue falla antes de publicar y la
+  versión anterior sigue en producción.
+- El catálogo de invitados en Firestore es inválido: la nueva versión no arranca, el despliegue
+  falla y la versión anterior sigue en producción.
 - Se despliega el frontend antes que el backend con un cambio que depende de ambos: la
   coordinación es responsabilidad del desarrollador; cada pipeline es independiente.
 
@@ -125,9 +131,9 @@ comportamiento anterior.
   (`vamosjuntos.club`).
 - **FR-009**: Los pipelines MUST autenticarse en la nube sin llaves de larga duración guardadas
   en el repositorio ni en los secretos de la plataforma.
-- **FR-010**: El catálogo de invitados y sus códigos MUST llegar al backend desde un almacén de
-  secretos (los secrets del repositorio en GitHub); MUST NOT aparecer en los repositorios, en los
-  archivos de pipeline ni en los logs de las ejecuciones.
+- **FR-010**: La llave de sesión MUST llegar al backend desde un almacén de secretos (los secrets
+  del repositorio en GitHub). Ni ella ni los códigos de invitación (que viven en Firestore) MUST
+  aparecer en los repositorios, en los archivos de pipeline ni en los logs de las ejecuciones.
 - **FR-011**: Los despliegues de un mismo repositorio MUST ejecutarse de uno en uno; si llega un
   commit más nuevo, la versión final publicada MUST ser la del commit más reciente.
 - **FR-012**: Cada ejecución MUST dejar un registro consultable con su resultado y el commit
@@ -138,8 +144,8 @@ comportamiento anterior.
 - **Ejecución de pipeline**: un intento de validar y publicar un commit; tiene repositorio, commit,
   resultado (exitosa o fallida) y fecha.
 - **Ambiente de producción**: el único ambiente de la V1, donde la familia usa la app.
-- **Secreto**: un dato sensible (catálogo de invitados, códigos) que se inyecta al publicar y nunca
-  se versiona.
+- **Secreto**: un dato sensible (la llave de sesión) que se inyecta al publicar y nunca se
+  versiona. Los códigos de invitación no pasan por el pipeline.
 
 ## Success Criteria *(mandatory)*
 

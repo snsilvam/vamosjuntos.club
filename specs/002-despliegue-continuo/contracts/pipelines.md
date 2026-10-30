@@ -15,7 +15,7 @@ recursos e identidades están en [data-model.md](../data-model.md) y el porqué 
 | Jobs | Uno solo, `deploy`, en `ubuntu-latest`, con `if: github.ref == 'refs/heads/production'` |
 | Permisos | `contents: read` e `id-token: write`; nada más |
 | Autenticación | `google-github-actions/auth@v3` con `workload_identity_provider` y `service_account` escritos en `with:`, como en kaizen. Sin llaves JSON (FR-009) |
-| Secretos | Solo el backend usa `secrets.GUESTS_JSON` y `secrets.SESSION_KEY`, como `env` del paso que los necesita. Nunca se imprimen ni se usa `set -x` (FR-010) |
+| Secretos | Solo el backend usa `secrets.SESSION_KEY`, como `env` del paso que la necesita. El catálogo vive en Firestore y no pasa por el pipeline. Nunca se imprimen ni se usa `set -x` (FR-010) |
 | Orden | Compuertas → autenticación → publicación. Si un paso falla, la ejecución se detiene y no publica (FR-006) |
 | Rastro | El commit (`github.sha`) queda en lo publicado (FR-012) |
 
@@ -42,7 +42,7 @@ recursos e identidades están en [data-model.md](../data-model.md) y el porqué 
 | 4 | `go vet ./...` | Hay hallazgos |
 | 5 | `golangci/golangci-lint-action@v9` con `version: v2.15.0` | Hay hallazgos |
 | 6 | `go test ./...` | Falla una prueba |
-| 7 | Validar secrets: `test -n "$GUESTS_JSON"` y `test -n "$SESSION_KEY"`, con mensaje que no incluye valores | Falta un secret (caso borde de la spec) |
+| 7 | Validar secrets: `test -n "$SESSION_KEY"`, con mensaje que no incluye valores | Falta un secret (caso borde de la spec) |
 | 8 | `auth@v3` → `projects/54833988307/locations/global/workloadIdentityPools/github-pool/providers/github-provider` con `github-actions-cloud-run@vamosjuntos-club.iam.gserviceaccount.com` | La rama no es `production` o falta un permiso |
 | 9 | `google-github-actions/setup-gcloud@v3` | |
 | 10 | `gcloud auth configure-docker us-central1-docker.pkg.dev --quiet` | |
@@ -64,10 +64,9 @@ recursos e identidades están en [data-model.md](../data-model.md) y el porqué 
 | `--allow-unauthenticated` | | Hosting la invoca como cliente público |
 | `--service-account` | `vamosjuntos-backend-run@vamosjuntos-club.iam.gserviceaccount.com` | Solo con `datastore.user` (R5) |
 | `--max-instances` | `2` | Tope de costo |
-| `--set-env-vars` | `"^;^EVENT_ID=$EVENT_ID;FIRESTORE_DATABASE=$FIRESTORE_DATABASE;GUESTS_JSON=$GUESTS_JSON;SESSION_KEY=$SESSION_KEY"` | Separador `;` como en kaizen; las comas del JSON no lo rompen (R6) |
+| `--set-env-vars` | `"^;^EVENT_ID=$EVENT_ID;FIRESTORE_DATABASE=$FIRESTORE_DATABASE;SESSION_KEY=$SESSION_KEY"` | Separador `;` como en kaizen (R6) |
 
-`GUESTS_JSON` y `SESSION_KEY` llegan al paso como `env: { GUESTS_JSON: ${{ secrets.GUESTS_JSON }},
-SESSION_KEY: ${{ secrets.SESSION_KEY }} }`.
+`SESSION_KEY` llega al paso como `env: { SESSION_KEY: ${{ secrets.SESSION_KEY }} }`.
 
 ### Contenedor
 

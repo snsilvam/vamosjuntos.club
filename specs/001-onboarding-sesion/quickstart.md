@@ -24,7 +24,6 @@ export GOOGLE_CLOUD_PROJECT=vamosjuntos-local
 # Contra el proyecto real: GOOGLE_CLOUD_PROJECT=vamosjuntos-club y FIRESTORE_DATABASE=vamosjuntos-club-db
 export EVENT_ID=paseo-familiar-diciembre-2026
 export SESSION_KEY=$(openssl rand -base64 32)
-export GUESTS_JSON='[["Carmencita","prueba01"],["Liam","prueba02"],["papá de lore","prueba03"]]'
 
 # Sembrar el evento directamente en el emulador (la app nunca crea eventos, Principio I)
 curl -s -X POST \
@@ -36,6 +35,12 @@ curl -s -X POST \
     "destination":{"stringValue":"Acacías, Meta, Colombia"},
     "departurePlaces":{"arrayValue":{"values":[{"stringValue":"Bogotá"},{"stringValue":"Tocancipá"}]}},
     "capacity":{"integerValue":"25"}}}'
+
+# Invitados de PRUEBA en events/{EVENT_ID}/users (campos Nombre y código, como en producción)
+for g in "carmencita|Carmencita|prueba01" "liam|Liam|prueba02" "papa-de-lore|papá de lore|prueba03"; do
+  IFS='|' read -r id nombre codigo <<< "$g"
+  curl -s -X POST     "http://localhost:8081/v1/projects/vamosjuntos-local/databases/(default)/documents/events/paseo-familiar-diciembre-2026/users?documentId=$id"     -H "Content-Type: application/json; charset=utf-8"     -d "{\"fields\":{\"Nombre\":{\"stringValue\":\"$nombre\"},\"código\":{\"stringValue\":\"$codigo\"}}}"
+done
 
 go run .   # escucha en :8080
 
@@ -62,8 +67,9 @@ npm install && npm run dev
 | 9 | "Ya confirmé" + `prueba01` en una ventana privada nueva | Entra como Carmencita | US3-1 |
 | 10 | 5 códigos incorrectos seguidos | Mensaje de bloqueo; el 6.º intento, aun con el código correcto, se rechaza | FR-010 |
 | 11 | "Cerrar sesión" | Vuelve al onboarding; `/api/session` responde `401` | US6 |
-| 12 | Quitar a Carmencita de `GUESTS_JSON`, reiniciar el backend y recargar con su sesión | La app vuelve al onboarding (`403 not_invited`) | US2-3 |
-| 13 | Arrancar con un código repetido, uno de 5 caracteres o 26 invitados | El backend termina con un error claro en el log | FR-013, FR-016 |
+| 12 | Borrar el documento de Carmencita en `users` y recargar con su sesión, sin reiniciar el backend | La app vuelve al onboarding (`403 not_invited`) | US2-3, FR-001 |
+| 13 | Dejar en `users` un código repetido, uno de 5 caracteres o 26 invitados | Al arrancar, el backend termina con un error claro en el log. Con el backend en marcha, la app muestra el mensaje genérico y el log nombra a los invitados, sin códigos | FR-013, FR-016 |
+| 15 | Agregar un documento a `users` con el backend en marcha | El invitado aparece en la lista de pendientes al recargar | FR-001 |
 | 14 | Borrar el evento del emulador y recargar | "El paseo aún no está disponible..." | FR-004 |
 
 ## 3. Chequeos automáticos
@@ -81,3 +87,14 @@ En la consola de Firestore, en la base `vamosjuntos-club-db`, crea la colección
 `paseo-familiar-diciembre-2026` con los campos de [data-model.md](data-model.md#evento--firestore-eventsevent_id).
 Ojo: la consola captura las fechas en la zona horaria del navegador. Verifica que `startsAt`
 quede como 2026-12-23 19:00 UTC y `endsAt` como 2026-12-26 16:00 UTC.
+
+## 5. Invitados reales en producción (organizador)
+
+En la misma base, dentro del documento del evento, la subcolección `users` tiene un documento por
+invitado, con id automático y los campos `Nombre` y `código`
+([data-model.md](data-model.md#invitado--firestore-eventsevent_idusersguestid)).
+
+- **Cambios**: agregar, corregir o borrar un invitado aplica de inmediato, sin desplegar.
+- **Ids**: no cambies el id de un documento; es el `guestId` de las sesiones y respuestas.
+- **Códigos**: los lee el organizador en la consola para entregarlos. Las reglas de Firestore
+  impiden leerlos desde fuera del backend.

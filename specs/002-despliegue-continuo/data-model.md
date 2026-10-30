@@ -50,8 +50,12 @@ su propia cuenta.
 
 | Secret de GitHub (repo `vamosjuntos-backend`) | Variable en Cloud Run | Contenido | Lo crea |
 |-----------------------------------------------|-----------------------|-----------|---------|
-| `GUESTS_JSON` | `GUESTS_JSON` | `[["Nombre","código"], ...]` en una línea, con las reglas de [data-model de 001](../001-onboarding-sesion/data-model.md#invitado--variable-de-entorno-guests_json-no-se-guarda-en-firestore). Los códigos no pueden contener `;` | El responsable, en *Settings → Secrets and variables → Actions* |
-| `SESSION_KEY` | `SESSION_KEY` | 32 bytes aleatorios en base64 (`openssl rand -base64 32`) | Igual |
+| `SESSION_KEY` | `SESSION_KEY` | 32 bytes aleatorios en base64 (`openssl rand -base64 32`) | El responsable, en *Settings → Secrets and variables → Actions* |
+
+El catálogo de invitados ya no es un secret (enmienda v2.0.0). Vive en Firestore,
+`events/{EVENT_ID}/users`, con las reglas de
+[data-model de 001](../001-onboarding-sesion/data-model.md#invitado--firestore-eventsevent_idusersguestid);
+lo lee el backend con `vamosjuntos-backend-run`.
 
 **Reglas**:
 - Los secretos nunca se escriben en archivos versionados ni en el YAML del workflow, que solo los
@@ -67,7 +71,7 @@ su propia cuenta.
 |----------|--------|-------|
 | `EVENT_ID` | `env` del workflow | `paseo-familiar-diciembre-2026` |
 | `FIRESTORE_DATABASE` | `env` del workflow | `vamosjuntos-club-db` |
-| `GUESTS_JSON`, `SESSION_KEY` | Secrets de GitHub | Ver arriba |
+| `SESSION_KEY` | Secret de GitHub | Ver arriba |
 | `PORT` | Cloud Run | `8080` |
 | `GOOGLE_CLOUD_PROJECT` | No se define | El backend lo detecta en Cloud Run |
 

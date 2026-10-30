@@ -13,8 +13,9 @@ invitado escribiendo el código de esa persona.
 
 Enfoque técnico:
 
-- **Backend** en Go con la biblioteca estándar (`net/http`). Lee el catálogo de la variable de
-  entorno `GUESTS_JSON` y lo valida al arrancar.
+- **Backend** en Go con la biblioteca estándar (`net/http`). Lee el catálogo de la subcolección
+  `events/{EVENT_ID}/users` de Firestore en cada request que lo usa y lo valida (también al
+  arrancar). *Enmienda v2.0.0: antes venía de la variable de entorno `GUESTS_JSON` (R12).*
 - **Firestore** guarda solo las respuestas de asistencia y los intentos fallidos. Los cambios de
   estado pasan por transacciones y una función pura de transición.
 - **Sesión** sin estado: cookie `__session` firmada con HMAC, por la restricción de Firebase
@@ -35,7 +36,8 @@ Detalle de las decisiones en [research.md](research.md).
 
 **Storage**: Firestore (modo nativo). `events/{EVENT_ID}` es de solo lectura;
 `events/{EVENT_ID}/attendance/{guestId}` guarda las respuestas y `loginAttempts/{deviceId}` los
-intentos. El catálogo vive en una variable de entorno y no se guarda en Firestore.
+intentos. `events/{EVENT_ID}/users/{guestId}` guarda el catálogo (nombre y código), que el
+organizador mantiene a mano; la app solo lo lee.
 
 **Testing**: `go test` (biblioteca estándar `testing` + `httptest`) para la lógica pura y los
 handlers. En el frontend, el build con chequeo de tipos; la prueba de punta a punta es manual con
@@ -64,7 +66,7 @@ de 30 s (SC-005). Basta con respuestas de API por debajo de 1 s con arranque en 
 | Principio | Verificación | Estado |
 |-----------|--------------|--------|
 | I. Alcance cerrado | Un solo evento (`EVENT_ID`), que la app solo lee; tope de 25 invitados validado al arrancar; sin CRUD de eventos. La siembra local se hace con `curl` al emulador, no con código de la app. | ✅ |
-| II. Acceso por invitación | El backend valida sesión y estado confirmado en cada request protegido (FR-008); el onboarding sigue el orden nombre → código → confirmación; el catálogo y los códigos vienen de variables de entorno y nunca se versionan. | ✅ |
+| II. Acceso por invitación | El backend valida sesión y estado confirmado en cada request protegido (FR-008); el onboarding sigue el orden nombre → código → confirmación; el catálogo y los códigos vienen de `events/{EVENT_ID}/users` (solo lectura, reglas de Firestore cerradas a clientes) y nunca se versionan. | ✅ |
 | III. Simplicidad | Un solo paquete `main` plano en el backend; cliente oficial de Firestore sin capas de repositorio; sin framework HTTP; frontend sin librerías de estado. | ✅ |
 | IV. Código idiomático | Go: structs con constructores `NewXxx`, interfaces pequeñas definidas en los handlers, `context.Context` en el I/O, errores envueltos con `%w`, sin estado global ni `panic`; reglas de transición, token y límite de intentos como funciones puras. React: solo componentes funcionales y hooks, Tailwind, `camelCase` / `PascalCase`. | ✅ |
 | V. Errores y HTTP | Contrato con 400, 401, 403, 404, 409 y 429 y cuerpo `{"error":{"code"}}`; la UI traduce cada código a un mensaje en español ([contracts/api.md](contracts/api.md)). | ✅ |
@@ -98,7 +100,7 @@ vamosjuntos-backend/
 ├── go.mod
 ├── main.go              # Configuración, cliente de Firestore, rutas y arranque del servidor
 ├── config.go            # Lectura y validación de variables de entorno
-├── catalog.go           # Parseo y validación de GUESTS_JSON, slug, búsqueda por código (puro)
+├── catalog.go           # Validación y búsqueda del catálogo (puro) + GuestStore (lee events/{id}/users)
 ├── catalog_test.go
 ├── attendance.go        # nextStatus (puro) + almacén en Firestore con transacciones
 ├── attendance_test.go

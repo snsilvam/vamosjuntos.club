@@ -99,22 +99,14 @@ for role in roles/firebasehosting.admin roles/run.viewer \
 done
 ```
 
-### 1.7 Secrets en GitHub (los códigos reales solo pasan por aquí)
+### 1.7 Secret en GitHub
 
 En `snsilvam/vamosjuntos-backend`, entra a *Settings → Secrets and variables → Actions → New
-repository secret* y crea:
+repository secret* y crea `SESSION_KEY` con la salida de `openssl rand -base64 32`. Genérala en tu
+terminal y no la pegues en otro lado.
 
-| Secret | Valor |
-|--------|-------|
-| `GUESTS_JSON` | El catálogo real en una línea: `[["Carmencita","<código>"], ...]` |
-| `SESSION_KEY` | La salida de `openssl rand -base64 32` |
-
-`GUESTS_JSON` debe cumplir las reglas de la [spec 001](../001-onboarding-sesion/data-model.md):
-- máximo 25 invitados;
-- códigos únicos de al menos 6 caracteres;
-- además, **ningún código puede contener `;`**.
-
-Copia los valores desde un archivo local fuera de los repos y bórralo al terminar.
+Los invitados ya no son un secret (enmienda v2.0.0): viven en Firestore. Ver el
+[quickstart de 001, §5](../001-onboarding-sesion/quickstart.md).
 
 ### 1.8 Evento real
 
@@ -167,13 +159,13 @@ que exista el servicio de Cloud Run del rewrite.
 | 10 | "Run workflow" eligiendo `main` | El job se salta (`if`) y no se publica nada | FR-002 |
 | 11 | `git revert` en `main` del commit del escenario 1 y `git push origin main:production` | En menos de 15 min la revisión activa vuelve al código anterior | US4, SC-004 |
 | 12 | Antes de abrir la app a la familia: borra el secret `SESSION_KEY` y usa "Run workflow" | Falla en "Validar secrets" sin desplegar y la revisión anterior sigue sirviendo. Luego créalo con un valor nuevo y relanza (eso cierra las sesiones de prueba) | Caso borde: falta un secreto |
-| 13 | En el log del paso de despliegue | Los valores de `GUESTS_JSON` y `SESSION_KEY` aparecen como `***` | FR-010 |
+| 13 | En el log del paso de despliegue | El valor de `SESSION_KEY` aparece como `***` | FR-010 |
 | 14 | En ambos repos: `git grep -nIiE "private_key\|BEGIN .*PRIVATE KEY"` y `git grep -nI "<un código real>"` (prueba 2 o 3) | 0 resultados | SC-003, FR-010 |
 
 ## 4. Operación
 
-- **Cambiar el catálogo**: edita el secret `GUESTS_JSON` en GitHub y usa "Run workflow" sobre
-  `production` en el backend.
+- **Cambiar el catálogo**: edita `events/paseo-familiar-diciembre-2026/users` en la consola de
+  Firestore. Aplica de inmediato, sin desplegar.
 - **Rotar `SESSION_KEY`**: pon un valor nuevo de `openssl rand -base64 32` y usa "Run workflow".
   Todas las sesiones se cierran.
 - **Emergencia, si no hay tiempo para esperar el pipeline**:
