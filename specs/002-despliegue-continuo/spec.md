@@ -6,45 +6,49 @@
 
 **Status**: Draft
 
-**Input**: Derivado de la constitución v1.1.0 ("Despliegue Continuo"): "Pipelines de despliegue
-de GitHub: el backend a Cloud Run y el frontend a Firebase Hosting. Un push a `main` despliega a
-producción; las compuertas de calidad deben pasar antes de desplegar."
+**Input**: Derivado de la constitución v1.2.0 ("Despliegue Continuo"): "Pipelines de despliegue
+de GitHub: el backend a Cloud Run y el frontend a Firebase Hosting. Un push a `production`
+despliega a producción; las compuertas de calidad deben pasar antes de desplegar."
+
+**Enmienda 2026-10-30**: el responsable pidió seguir la estructura de `kaizen-app`. La rama que
+despliega pasa de `main` a `production` (`main` queda como rama de integración), y los secretos se
+guardan en los secrets del repositorio en GitHub, sin Secret Manager.
 
 ## User Scenarios & Testing *(mandatory)*
 
 El actor de esta feature es el responsable del proyecto (quien desarrolla y publica la app).
 
-### User Story 1 - Publicar el backend al integrar en main (Priority: P1)
+### User Story 1 - Publicar el backend al integrar en production (Priority: P1)
 
-El responsable integra un cambio en la rama `main` del repositorio del backend y, sin pasos
+El responsable integra un cambio en la rama `production` del repositorio del backend y, sin pasos
 manuales, la nueva versión queda publicada en producción.
 
 **Why this priority**: sin backend publicado ninguna feature funciona para la familia.
 
 **Independent Test**: un cambio visible del backend (por ejemplo, un texto de respuesta) integrado
-en `main` aparece en producción sin intervención manual.
+en `production` aparece en producción sin intervención manual.
 
 **Acceptance Scenarios**:
 
-1. **Given** un cambio que pasa las validaciones, **When** se integra en `main` del backend,
+1. **Given** un cambio que pasa las validaciones, **When** se integra en `production` del backend,
    **Then** la nueva versión queda en producción y el registro de la ejecución muestra éxito.
 2. **Given** un cambio integrado en otra rama, **When** se sube, **Then** no se publica nada.
 
 ---
 
-### User Story 2 - Publicar el frontend al integrar en main (Priority: P1)
+### User Story 2 - Publicar el frontend al integrar en production (Priority: P1)
 
-El responsable integra un cambio en `main` del repositorio del frontend y la nueva versión del
+El responsable integra un cambio en `production` del repositorio del frontend y la nueva versión del
 sitio queda publicada en `vamosjuntos.club`.
 
 **Why this priority**: es lo que la familia ve y usa.
 
-**Independent Test**: un cambio visible del sitio integrado en `main` aparece al recargar
+**Independent Test**: un cambio visible del sitio integrado en `production` aparece al recargar
 `vamosjuntos.club`.
 
 **Acceptance Scenarios**:
 
-1. **Given** un cambio que pasa las validaciones, **When** se integra en `main` del frontend,
+1. **Given** un cambio que pasa las validaciones, **When** se integra en `production` del frontend,
    **Then** el sitio publicado muestra el cambio.
 2. **Given** el sitio publicado, **When** el frontend llama al backend, **Then** lo hace en el
    mismo dominio, sin errores de origen cruzado.
@@ -64,9 +68,9 @@ producción la versión anterior y marca la ejecución como fallida.
 **Acceptance Scenarios**:
 
 1. **Given** un cambio de backend con formato incorrecto, error de análisis estático o del linter,
-   **When** se integra en `main`, **Then** el despliegue no ocurre y la ejecución queda fallida.
+   **When** se integra en `production`, **Then** el despliegue no ocurre y la ejecución queda fallida.
 2. **Given** un cambio de frontend que no compila o tiene errores de tipos, **When** se integra en
-   `main`, **Then** el despliegue no ocurre y la ejecución queda fallida.
+   `production`, **Then** el despliegue no ocurre y la ejecución queda fallida.
 3. **Given** una ejecución fallida, **When** termina, **Then** el responsable recibe la
    notificación estándar de la plataforma.
 
@@ -74,24 +78,24 @@ producción la versión anterior y marca la ejecución como fallida.
 
 ### User Story 4 - Volver a una versión anterior (Priority: P3)
 
-Una versión publicada tiene un problema. El responsable revierte el cambio en `main` y la versión
+Una versión publicada tiene un problema. El responsable revierte el cambio en `production` y la versión
 anterior vuelve a producción por el mismo pipeline.
 
 **Why this priority**: es poco frecuente, pero en diciembre no hay tiempo para arreglos largos.
 
-**Independent Test**: revertir el último commit de `main` vuelve a dejar en producción el
+**Independent Test**: revertir el último commit de `production` vuelve a dejar en producción el
 comportamiento anterior.
 
 **Acceptance Scenarios**:
 
-1. **Given** una versión con problema en producción, **When** se revierte el commit en `main`,
+1. **Given** una versión con problema en producción, **When** se revierte el commit en `production`,
    **Then** el pipeline publica la versión anterior.
 
 ---
 
 ### Edge Cases
 
-- Dos cambios se integran en `main` casi al mismo tiempo: los despliegues no se solapan y queda
+- Dos cambios se integran en `production` casi al mismo tiempo: los despliegues no se solapan y queda
   publicada la versión del último commit.
 - Falla la conexión con la nube a mitad del despliegue: la versión anterior sigue sirviendo y la
   ejecución queda fallida; se puede relanzar manualmente.
@@ -106,8 +110,8 @@ comportamiento anterior.
 
 - **FR-001**: Cada repositorio de código (backend y frontend) MUST tener su propio pipeline
   independiente.
-- **FR-002**: Un push a `main` MUST disparar el pipeline del repositorio correspondiente; pushes a
-  otras ramas MUST NOT publicar nada.
+- **FR-002**: Un push a `production` MUST disparar el pipeline del repositorio correspondiente;
+  pushes a otras ramas, incluida `main`, MUST NOT publicar nada.
 - **FR-003**: Cada pipeline MUST poder relanzarse manualmente sin nuevos commits.
 - **FR-004**: El pipeline del backend MUST verificar formato, análisis estático y linter según el
   Principio IV, y ejecutar las pruebas automatizadas si existen, antes de publicar.
@@ -122,7 +126,8 @@ comportamiento anterior.
 - **FR-009**: Los pipelines MUST autenticarse en la nube sin llaves de larga duración guardadas
   en el repositorio ni en los secretos de la plataforma.
 - **FR-010**: El catálogo de invitados y sus códigos MUST llegar al backend desde un almacén de
-  secretos; MUST NOT aparecer en los repositorios ni en los archivos de pipeline.
+  secretos (los secrets del repositorio en GitHub); MUST NOT aparecer en los repositorios, en los
+  archivos de pipeline ni en los logs de las ejecuciones.
 - **FR-011**: Los despliegues de un mismo repositorio MUST ejecutarse de uno en uno; si llega un
   commit más nuevo, la versión final publicada MUST ser la del commit más reciente.
 - **FR-012**: Cada ejecución MUST dejar un registro consultable con su resultado y el commit
@@ -140,7 +145,7 @@ comportamiento anterior.
 
 ### Measurable Outcomes
 
-- **SC-001**: Un cambio integrado en `main` está en producción en menos de 10 minutos.
+- **SC-001**: Un cambio integrado en `production` está en producción en menos de 10 minutos.
 - **SC-002**: El 100 % de los commits con alguna validación fallida no llegan a producción.
 - **SC-003**: Una búsqueda de códigos de invitación o llaves de nube en ambos repositorios devuelve
   0 resultados.
@@ -155,6 +160,9 @@ comportamiento anterior.
 - La configuración inicial de la nube (proyecto, permisos de despliegue, registro de imágenes,
   dominio) se hace una sola vez a mano, siguiendo instrucciones documentadas en el plan; no se
   automatiza con herramientas de infraestructura como código.
-- Los ejemplos de pipelines de Go y React que tiene el responsable se usan como base en el plan.
+- Los pipelines siguen la estructura de `kaizen-app` del responsable: rama `production`, WIF con
+  cuenta de servicio, Docker hacia Artifact Registry, `gcloud run deploy` y secretos de GitHub
+  pasados como variables de entorno de Cloud Run.
+- El flujo de ramas es: rama de feature → `main` (integración) → `production` (despliegue).
 - La notificación de fallos es la que ofrece la plataforma por defecto (correo); no se agregan
   otros canales.

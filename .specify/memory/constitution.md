@@ -132,13 +132,16 @@ versiona.
   - **Backend** (`/vamosjuntos-backend`): GitHub → imagen de contenedor en Artifact Registry →
     **Cloud Run**.
   - **Frontend** (`/vamosjuntos-frontend`): GitHub → build estático → **Firebase Hosting**.
-- Un push a `main` MUST disparar el despliegue a producción. No hay otros ambientes en la V1.
+- Un push a la rama `production` MUST disparar el despliegue a producción; pushes a cualquier
+  otra rama (incluida `main`, que es la rama de integración) MUST NOT desplegar. No hay otros
+  ambientes en la V1.
 - El pipeline MUST ejecutar las compuertas de calidad del Principio IV antes de desplegar; si
   alguna falla, el despliegue MUST NOT ocurrir.
 - Los pipelines MUST autenticarse en GCP con Workload Identity Federation. Prohibido guardar
   llaves JSON de cuentas de servicio en los secrets de GitHub.
 - Los workflows MUST NOT contener en texto plano los códigos de invitación ni otros secretos;
-  se inyectan desde Secret Manager o la configuración de Cloud Run.
+  se guardan en los secrets del repositorio en GitHub (o en Secret Manager) y llegan al backend
+  como variables de entorno de Cloud Run.
 - El detalle de cada workflow (pasos, acciones, Dockerfile) se define en el `plan.md` del spec
   de infraestructura, no en esta constitución.
 
@@ -191,4 +194,4 @@ alcance.
   que no haya código sombra, que los errores sigan el Principio V, que el backend pase
   `gofmt`, `go vet` y `golangci-lint`, y que los pipelines cumplan "Despliegue Continuo".
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30
+**Version**: 1.2.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30
