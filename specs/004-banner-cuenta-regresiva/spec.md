@@ -19,6 +19,12 @@ le diga al usuario cuántos días faltan para el próximo evento al que está in
   conteo, así que nunca contradice al reloj. Los tramos siguen por días calendario de Colombia.
   En "mañana" y "hoy" no hay número grande: el mensaje del tramo va con el reloj.
 
+### Session 2026-10-31
+
+- Q: La spec cita la sesión de la spec 001. ¿Sigue vigente? → A: no; desde la constitución v3.0.0
+  la sesión es la de Firebase Authentication (spec 008): cuenta vinculada y asistencia
+  confirmada, validadas en cada request con `requireGuest`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ver cuántos días faltan (Priority: P1)
@@ -107,7 +113,7 @@ diciembre, el banner muestra el mensaje de cada estado.
 ### Functional Requirements
 
 - **FR-001**: El banner MUST mostrarse en la pantalla principal solo a invitados con sesión
-  activa (spec 001), como primer elemento visible.
+  activa, cuenta vinculada y asistencia confirmada (spec 008), como primer elemento visible.
 - **FR-002**: El tramo MUST calcularse con la diferencia en días calendario entre la fecha actual
   y la fecha de inicio del evento, ambas en hora de Colombia. El número grande MUST ser los días
   completos (de 24 h) del tiempo que falta para el inicio, el mismo que muestra el reloj

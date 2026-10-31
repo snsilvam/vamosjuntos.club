@@ -47,7 +47,8 @@ las mismas versiones del desarrollo local.
 
 **Storage**:
 - Artifact Registry guarda las imágenes del backend.
-- Los secrets del repo `vamosjuntos-backend` guardan `SESSION_KEY`.
+- *(Hasta la spec 008)* los secrets del repo `vamosjuntos-backend` guardaban `SESSION_KEY`. Desde
+  la 008 el backend no tiene secrets; el frontend recibe `vars.VITE_FIREBASE_*`.
 - Firestore (`vamosjuntos-club-db`) guarda el catálogo en `events/{EVENT_ID}/users` (spec 001,
   enmienda v2.0.0); el pipeline no lo toca.
 
@@ -91,7 +92,7 @@ y los secretos se guardan en los secrets de GitHub.
 | Principio | Verificación | Estado |
 |-----------|--------------|--------|
 | I. Alcance cerrado | No agrega funciones a la app; un solo ambiente: producción. | ✅ |
-| II. Acceso por invitación | El catálogo y los códigos viven en Firestore (constitución v2.0.0) y nunca pasan por el pipeline. `SESSION_KEY` vive en los secrets del repo del backend y GitHub la enmascara en los logs. Hosting y la API comparten dominio, así que la cookie `__session` sigue siendo de primera parte. | ✅ |
+| II. Acceso por invitación | El catálogo y los códigos viven en Firestore (constitución v2.0.0) y nunca pasan por el pipeline. Desde la spec 008 el backend no tiene secrets: la sesión es el ID token de Firebase en `Authorization: Bearer` (antes, `SESSION_KEY` y la cookie `__session`). Hosting y la API comparten dominio, así que no hay CORS. | ✅ |
 | III. Simplicidad | La estructura de kaizen: un workflow y un job por repo, `gcloud` y `firebase-tools` directos, sin IaC y sin Secret Manager. | ✅ |
 | IV. Compuertas | Backend: `gofmt`, `go vet`, `golangci-lint` y `go test` antes de construir la imagen. Frontend: `npm run build` (`tsc -b && vite build`). Si algo falla, el job se detiene antes de pedir credenciales de nube. | ✅ |
 | V. Errores y HTTP | No cambia contratos. El `no-store` de la spec 001 evita que el CDN guarde respuestas de la API. | ✅ |

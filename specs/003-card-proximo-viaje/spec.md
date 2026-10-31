@@ -10,6 +10,14 @@
 del próximo evento: nombre, lugar de salida, lugar de llegada, fecha de inicio y fecha de fin.
 Cantidad de invitados del evento, confirmados y pendientes de confirmar."
 
+## Clarifications
+
+### Session 2026-10-31
+
+- Q: La spec cita la sesión de la spec 001. ¿Sigue vigente? → A: no; desde la constitución v3.0.0
+  la sesión es la de Firebase Authentication (spec 008): cuenta vinculada y asistencia
+  confirmada, validadas en cada request con `requireGuest`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ver los datos del viaje (Priority: P1)
@@ -65,7 +73,8 @@ uno (confirmados +1, pendientes −1).
 
 ### Functional Requirements
 
-- **FR-001**: La card MUST mostrarse solo a invitados con sesión activa (spec 001).
+- **FR-001**: La card MUST mostrarse solo a invitados con sesión activa, cuenta vinculada y
+  asistencia confirmada (spec 008).
 - **FR-002**: La card MUST mostrar nombre del evento, lugares de salida, destino, fecha y hora de
   inicio y fecha y hora de fin, tomados del registro del evento.
 - **FR-003**: Fechas y horas MUST mostrarse en hora de Colombia, en español, con día de la semana,

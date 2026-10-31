@@ -129,11 +129,12 @@ invitado del catálogo y confirmado. Es la única cuenta que llega a la pantalla
 
 - **Decision**:
   - Los textos viven en el frontend, en el componente del banner.
-  - Plural (FR-008): `días === 1 ? 'falta 1 día' : \`faltan ${días} días\``. Solo `tomorrow` puede
-    tener 1 día; los demás tramos con número tienen 2 o más.
+  - Plural (FR-008): `días === 1 ? 'falta 1 día' : \`faltan ${días} días\``. Desde la enmienda del
+    2026-10-30, el número son los días completos del reloj y solo `far`, `near` y `lastWeek` lo
+    muestran; en `lastWeek` puede ser 1 (data-model, "Reloj").
   - Mensajes por tramo: los ejemplos de la spec. La spec permite ajustarlos si se respetan los
     tramos.
-- **Rationale**: el backend solo entrega datos (`phase`, `daysLeft`), igual que en la 003, donde
+- **Rationale**: el backend solo entrega datos (`phase`, `daysLeft` y, desde la enmienda, `secondsToStart`), igual que en la 003, donde
   los textos también los arma el frontend.
 - **Alternatives considered**: **mandar el texto desde Go**: mezcla presentación con la API y obliga
   a desplegar el backend para cambiar una frase.

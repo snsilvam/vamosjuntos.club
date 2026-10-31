@@ -22,6 +22,9 @@ Enfoque técnico:
     (FR-009).
   - Animación con Tailwind bajo `motion-safe:` (FR-006).
 - **Sin escrituras**: no se crean colecciones, campos ni endpoints de escritura.
+- **Enmienda del 2026-10-30**: la respuesta trae también `secondsToStart`. El banner muestra un
+  reloj en vivo, y el número grande sale de ese mismo conteo; `tomorrow` y `today` van sin
+  número (FR-002, FR-011; data-model, "Reloj").
 
 Detalle de las decisiones en [research.md](research.md).
 

@@ -18,6 +18,12 @@ y cupos." Lugares de salida: Bogotá y Tocancipá. Destino: Acacías, Meta.
 - Q: ¿Se puede reservar cupo para otro invitado? → A: Sí (spec 001, clarificación sobre actuar
   en nombre de otro).
 
+### Session 2026-10-31
+
+- Q: La spec cita la sesión de la spec 001. ¿Sigue vigente? → A: no; desde la constitución v3.0.0
+  la sesión es la de Firebase Authentication (spec 008): cuenta vinculada y asistencia
+  confirmada, validadas en cada request con `requireGuest`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Ver vehículos y cupos disponibles (Priority: P1)
@@ -117,7 +123,8 @@ Cualquier invitado confirmado cambia los datos de un vehículo o lo elimina si y
 
 ### Functional Requirements
 
-- **FR-001**: El módulo MUST estar disponible solo para invitados con sesión activa (spec 001).
+- **FR-001**: El módulo MUST estar disponible solo para invitados con sesión activa, cuenta
+  vinculada y asistencia confirmada (spec 008).
 - **FR-002**: El sistema MUST listar los vehículos agrupados por lugar de salida (Bogotá,
   Tocancipá), mostrando nombre, conductor, cupos totales, cupos libres, pasajeros, hora estimada
   de salida y nota.

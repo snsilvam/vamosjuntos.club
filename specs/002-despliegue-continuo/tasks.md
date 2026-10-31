@@ -390,3 +390,19 @@ push):
 - **T037**: se reescribió con el escenario 12 actual (`VITE_FIREBASE_APP_ID`), porque el backend
   ya no tiene secrets.
 - **Pendiente**: T034 a T040, salvo lo anterior.
+
+### Estado de las pruebas de robustez (2026-10-31)
+
+- **Decisión del responsable**: T034, T035, T038 y T039 no se corren por ahora. Publican a
+  propósito un cambio roto o un rollback en `production`, y la familia ya usa la app. Ningún
+  commit de prueba llegó a crearse.
+- **Plan listo para cuando haya visto bueno** (todo por el pipeline, con commits `test(002)` en
+  `main`):
+  - backend: archivo mal formateado (T034) y su revert; dos commits vacíos seguidos (T039, primer
+    punto); cambio inofensivo y su `git revert` (T038);
+  - frontend: error de tipos (T035) y su revert.
+- **Solo desde la interfaz de GitHub**, porque esta máquina no tiene `gh` ni token: los dos
+  "Run workflow" de T039 (sobre `production` y sobre `main`) y T036 (correo de la ejecución
+  fallida).
+- **Sigue pendiente del responsable**: T037 (borrar y restaurar `VITE_FIREBASE_APP_ID`) y la
+  parte de T040 con códigos reales. La parte automática de T040 ya dio 0 (ver arriba).

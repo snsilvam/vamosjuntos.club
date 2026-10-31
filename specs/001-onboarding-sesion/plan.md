@@ -4,6 +4,13 @@
 
 **Input**: Feature specification from `/specs/001-onboarding-sesion/spec.md`
 
+> **Reemplazado en parte por la spec 008 (2026-10-30).** La sesión ya no es la cookie `__session`
+> firmada con `SESSION_KEY`, ni se usa `X-Device-Id`. Desde la 008 el usuario entra con Firebase
+> Authentication, el frontend envía el ID token en `Authorization: Bearer`, la cuenta se vincula una
+> vez a su invitado y el límite de intentos se cuenta por cuenta. Lo vigente está en
+> [la spec 008](../008-autenticacion-firebase/spec.md). Este documento se conserva como registro del
+> diseño original.
+
 ## Summary
 
 Puerta de entrada de la app. Un invitado elige su nombre de la lista de pendientes, valida su

@@ -42,11 +42,15 @@ Convenciones de la [spec 008](../../008-autenticacion-firebase/contracts/api.md)
 
 ## `POST /api/transport/vehicles`
 
+> **Nota (2026-10-30)**: crear, editar y reservar responden con el estado completo del módulo, no
+> con un solo `Vehicle`, para que la pantalla no haga otra llamada (desviación registrada en
+> tasks.md). Eliminar y liberar responden `204`.
+
 Registra un vehículo (FR-003). Request: `VehicleInput`.
 
 | Status | Cuerpo |
 |--------|--------|
-| 201 | `Vehicle` |
+| 201 | El mismo cuerpo de `GET /api/transport` (ver nota) |
 | 400 | `invalid_request`, `invalid_vehicle` (nombre, salida, cupos, hora o nota fuera de las reglas) |
 | 409 | `driver_unavailable` (el conductor no es confirmado, ya conduce o va como pasajero) |
 
@@ -56,7 +60,7 @@ Edita un vehículo (FR-007, FR-009). Request: `VehicleInput`.
 
 | Status | Cuerpo |
 |--------|--------|
-| 200 | `Vehicle` |
+| 200 | El mismo cuerpo de `GET /api/transport` |
 | 400 | `invalid_request`, `invalid_vehicle` |
 | 404 | `vehicle_not_found` |
 | 409 | `driver_unavailable`, `seats_below_passengers` |
@@ -77,7 +81,7 @@ Request: `{"guestId": "…"}`.
 
 | Status | Cuerpo |
 |--------|--------|
-| 200 | `Vehicle` (el de destino) |
+| 200 | El mismo cuerpo de `GET /api/transport` |
 | 400 | `invalid_request` |
 | 404 | `vehicle_not_found` |
 | 409 | `vehicle_full`; `guest_is_driver`; `guest_not_confirmed` |
