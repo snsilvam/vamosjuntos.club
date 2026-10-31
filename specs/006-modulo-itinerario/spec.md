@@ -4,11 +4,23 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Derivado de la constitución v1.1.0 ("Dominio de la V1"): "Módulo Itinerario:
 actividades y horarios en el transcurso del evento." Evento del 23 de diciembre de 2026, 2:00 p. m.,
 al 26 de diciembre de 2026, 11:00 a. m., hora Colombia.
+
+## Clarifications
+
+### Session 2026-10-30
+
+- Q: FR-005 permite que la hora de fin caiga en el día siguiente, pero US2-2 rechaza un fin anterior
+  o igual al inicio. ¿Cómo se distingue? → A: con una casilla explícita "Termina al día siguiente".
+  Sin marcarla, el fin MUST ser posterior al inicio (US2-2). Marcada, el fin cae el día siguiente y
+  la actividad dura como máximo 24 horas.
+- Q: La spec cita la sesión de la spec 001. ¿Sigue vigente? → A: no; desde la constitución v3.0.0
+  la sesión es la de Firebase Authentication (spec 008). El módulo es para invitados con cuenta
+  vinculada y asistencia confirmada, como Transporte (spec 005).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -84,15 +96,17 @@ aparece.
 
 ### Functional Requirements
 
-- **FR-001**: El módulo MUST estar disponible solo para invitados con sesión activa (spec 001).
+- **FR-001**: El módulo MUST estar disponible solo para invitados con sesión activa, cuenta
+  vinculada y asistencia confirmada (spec 008).
 - **FR-002**: El sistema MUST mostrar las actividades agrupadas por día y ordenadas por hora de
   inicio; en empate, por título.
 - **FR-003**: Una actividad MUST tener título, día y hora de inicio; hora de fin, lugar y
   descripción son opcionales.
 - **FR-004**: El día de la actividad MUST estar entre el 23 y el 26 de diciembre de 2026 (hora
   Colombia).
-- **FR-005**: Si hay hora de fin, MUST ser posterior a la de inicio; puede caer en el día
-  siguiente.
+- **FR-005**: Si hay hora de fin, MUST ser posterior a la de inicio. Puede caer en el día
+  siguiente solo si se marca "Termina al día siguiente", y en ese caso la actividad dura como
+  máximo 24 horas.
 - **FR-006**: Todas las horas MUST mostrarse y capturarse en hora de Colombia.
 - **FR-007**: Cualquier invitado confirmado MUST poder crear, editar y eliminar cualquier
   actividad (misma regla de la spec 005, FR-009).
@@ -101,9 +115,9 @@ aparece.
 
 ### Key Entities
 
-- **Actividad**: título, día, hora de inicio, hora de fin (opcional), lugar (opcional),
-  descripción (opcional).
-- **Evento**: definido en la spec 001; delimita los días válidos.
+- **Actividad**: título, día, hora de inicio, hora de fin (opcional), "termina al día siguiente"
+  (solo con hora de fin), lugar (opcional) y descripción (opcional).
+- **Evento**: definido en las specs 001 y 008; delimita los días válidos.
 
 ## Success Criteria *(mandatory)*
 
@@ -122,4 +136,4 @@ aparece.
 - No hay recordatorios ni notificaciones de actividades.
 - No se marca la actividad "en curso" ni se resalta la siguiente; solo se lista en orden.
 - No hay inscripción de asistentes por actividad.
-- Depende de la spec 001 (sesión) y de la regla de permisos de la spec 005.
+- Depende de la spec 008 (sesión) y de la regla de permisos de la spec 005.

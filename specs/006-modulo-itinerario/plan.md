@@ -1,113 +1,111 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Módulo Itinerario
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `006-modulo-itinerario` | **Date**: 2026-10-30 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
+**Input**: Feature specification from `/specs/006-modulo-itinerario/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Los confirmados ven las actividades del paseo agrupadas por día (23 al 26 de diciembre) y en orden
+de hora, y cualquiera de ellos puede agregar, editar o eliminar cualquier actividad.
+
+Enfoque técnico:
+
+- **Datos**: un documento por actividad en `events/{EVENT_ID}/activities/{activityId}`. El día y
+  las horas se guardan como texto en hora de Colombia (`2026-12-24`, `10:00`), sin conversiones de
+  zona horaria (FR-006).
+- **Reglas**: una función pura valida la actividad contra los días del evento (FR-003 a FR-005).
+  Las actividades no dependen entre sí, así que no hace falta una transacción sobre toda la
+  colección como en la 005.
+- **API**: `/api/itinerary/**` detrás de `requireGuest` (cuenta vinculada y confirmada, spec 008).
+- **Frontend**: una página `/itinerario` con un formulario para crear y editar, y un enlace en la
+  pantalla principal.
+
+Detalle en [research.md](research.md).
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+**Language/Version**: Go 1.26 y TypeScript + React 19, sin cambios.
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Primary Dependencies**: sin dependencias nuevas.
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Storage**: Firestore `vamosjuntos-club-db`, nueva colección `events/{EVENT_ID}/activities`.
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**:
+- **Backend**: `go test`, con la regla pura (tabla de casos) y handlers con un fake del almacén.
+- **Frontend**: el build y el lint.
+- **De punta a punta**: con el [quickstart](quickstart.md).
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Target Platform**: Cloud Run y Firebase Hosting, con el celular como cliente principal.
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: aplicación web (SPA + API REST).
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: encontrar la siguiente actividad en menos de 15 s (SC-001) y agregar una en
+menos de 1 min (SC-003).
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**:
+- Días solo del 23 al 26 de diciembre de 2026, tomados del evento (FR-004).
+- Horas en hora de Colombia, también desde otras zonas horarias (FR-006).
+- Mensajes en español (FR-009).
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: 25 confirmados como máximo, unas decenas de actividades, 4 endpoints y 1 página.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Se evalúa contra la constitución **v3.0.0**.
+
+| Principio | Verificación | Estado |
+|-----------|--------------|--------|
+| I. Alcance cerrado | Es el módulo "Itinerario: actividades y horarios" de "Dominio de la V1". Sin recordatorios, inscripciones ni "en curso" (spec, Assumptions). | ✅ |
+| II. Acceso por invitación | Todas las rutas usan `requireGuest`. | ✅ |
+| III. Simplicidad | Archivos `itinerary.go` e `itinerary_handlers.go` en el paquete `main` plano; un documento por actividad, sin transacciones sobre la colección. | ✅ |
+| IV. Código idiomático | Regla pura `validateActivity(in, days)`; `ItineraryStore` con `NewItineraryStore`; interfaz pequeña definida en los handlers; errores de dominio con `errors.Is`. | ✅ |
+| V. Errores y HTTP | `400` datos inválidos (con códigos para el orden de horas y el día fuera del paseo), `404` actividad inexistente; la UI los traduce. | ✅ |
+| VI. Cero código sombra | Solo FR-001 a FR-009. La casilla "Termina al día siguiente" sale de la aclaración del 2026-10-30. | ✅ |
+
+**Re-check post-diseño**: ✅
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit-plan command output)
-├── research.md          # Phase 0 output (/speckit-plan command)
-├── data-model.md        # Phase 1 output (/speckit-plan command)
-├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+specs/006-modulo-itinerario/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+│   └── api.md
+└── tasks.md             # /speckit-tasks
 ```
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### Source Code
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+vamosjuntos-backend/
+├── itinerary.go                 # NUEVO: Activity, validateActivity (puro), eventDays, ItineraryStore
+├── itinerary_test.go            # NUEVO: tabla de la regla pura y del orden
+├── itinerary_handlers.go        # NUEVO: handlers /api/itinerary/**
+├── itinerary_handlers_test.go   # NUEVO: handlers con fakeItinerary
+├── handlers.go                  # campo itinerary en server, NewServer y 4 rutas al final de routes()
+├── errors.go                    # códigos nuevos
+└── main.go                      # NewItineraryStore
 
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+vamosjuntos-frontend/
+├── src/pages/ItineraryPage.tsx  # NUEVO: lista por día, eliminar con confirmación
+├── src/pages/ActivityForm.tsx   # NUEVO: crear/editar actividad
+├── src/api/types.ts             # tipos del itinerario
+├── src/messages.ts              # mensajes nuevos
+├── src/App.tsx                  # ruta /itinerario (bloque confirmed)
+└── src/pages/HomePage.tsx       # enlace "Itinerario"
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: igual que la 005: archivos nuevos propios y cambios mínimos en los
+compartidos (`handlers.go`, `App.tsx`, `HomePage.tsx`), para integrar sin conflictos con la 007.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+No hay violaciones de la constitución que justificar.
