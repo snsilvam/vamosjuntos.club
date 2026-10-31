@@ -4,10 +4,22 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Derivado de la constitución v1.1.0 ("Dominio de la V1"): "Módulo Compras: comida y
 suministros."
+
+## Clarifications
+
+### Session 2026-10-30
+
+- Q: La spec cita la sesión de la spec 001. ¿Sigue vigente? → A: no; desde la constitución v3.0.0
+  la sesión es la de Firebase Authentication (spec 008). El módulo es para invitados con cuenta
+  vinculada y asistencia confirmada, como Transporte (spec 005) e Itinerario (spec 006).
+- Q: ¿"Yo lo llevo" puede asignar el ítem a otra persona? → A: no. Cada invitado se asigna solo a
+  sí mismo (US3); no hay "asignar a otro".
+- Q: Al soltar un ítem comprado, ¿qué pasa con su estado? → A: vuelve a "por comprar" y "sin
+  responsable" (US3-4).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -100,7 +112,8 @@ Cualquier invitado confirmado corrige la cantidad o el nombre de un ítem, o lo 
 
 ### Functional Requirements
 
-- **FR-001**: El módulo MUST estar disponible solo para invitados con sesión activa (spec 001).
+- **FR-001**: El módulo MUST estar disponible solo para invitados con sesión activa, cuenta
+  vinculada y asistencia confirmada (spec 008).
 - **FR-002**: El sistema MUST mostrar los ítems agrupados en las categorías "Comida" y
   "Suministros", con nombre, cantidad, nota, responsable y estado.
 - **FR-003**: Un ítem MUST tener nombre y categoría; cantidad (texto libre, por ejemplo "5 kg") y
@@ -120,7 +133,7 @@ Cualquier invitado confirmado corrige la cantidad o el nombre de un ítem, o lo 
 
 - **Ítem de compra**: nombre, categoría (Comida o Suministros), cantidad (opcional), nota
   (opcional), responsable (opcional) y estado (por comprar o comprado).
-- **Invitado**: definido en la spec 001.
+- **Invitado**: definido en las specs 001 y 008.
 
 ## Success Criteria *(mandatory)*
 
@@ -139,4 +152,4 @@ Cualquier invitado confirmado corrige la cantidad o el nombre de un ítem, o lo 
 - Las categorías son solo "Comida" y "Suministros", como fija la constitución.
 - La cantidad es texto libre; no hay unidades ni cálculos.
 - No hay integración con tiendas ni listas externas.
-- Depende de la spec 001 (sesión) y de la regla de permisos de la spec 005.
+- Depende de la spec 008 (sesión) y de la regla de permisos de la spec 005.
