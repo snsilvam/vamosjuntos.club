@@ -50,7 +50,7 @@ Reglas que aplican a todas las tareas:
   3. agregar `vamosjuntos.club` a los dominios autorizados;
   4. crear en `snsilvam/vamosjuntos-frontend` las **variables** de Actions `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID` y `VITE_FIREBASE_APP_ID`.
 - [X] T003 [P] Agregar el Admin SDK `firebase.google.com/go/v4@v4.21.0` en vamosjuntos-backend/go.mod
-- [ ] T004 [P] Instalar `firebase@^12.17.0` en vamosjuntos-frontend/package.json, crear vamosjuntos-frontend/.env.example con los cuatro `VITE_FIREBASE_*` (sin valores) y crear vamosjuntos-frontend/.env.local (ignorado) con los valores de T002
+- [X] T004 [P] Instalar `firebase@^12.17.0` en vamosjuntos-frontend/package.json, crear vamosjuntos-frontend/.env.example con los cuatro `VITE_FIREBASE_*` (sin valores) y crear vamosjuntos-frontend/.env.local (ignorado) con los valores de T002
 
 ---
 
@@ -88,7 +88,7 @@ Además, validar el riesgo R4 antes de construir las pantallas.
 
 ### Validación del riesgo R4
 
-- [ ] T017 (visto bueno) Validar que Hosting reenvía `Authorization` (research R4):
+- [X] T017 (visto bueno) Validar que Hosting reenvía `Authorization` (research R4):
   1. publicar el backend (`main` → `production`);
   2. obtener un ID token de una cuenta de correo de prueba con la API REST de Identity Toolkit (`accounts:signUp` con la `apiKey` pública);
   3. llamar `https://vamosjuntos-club.web.app/api/me` con `Authorization: Bearer <token>`.
@@ -220,9 +220,9 @@ el frontend tiene SDK, cliente y estado listos.
 - [X] T043 [P] Actualizar vamosjuntos-backend/README.md (sin `SESSION_KEY`, con `GOOGLE_CLOUD_PROJECT` obligatoria, autenticación por ID token y colección `links`) y vamosjuntos-frontend/README.md (configuración de Firebase, `.env.local` y variables de GitHub)
 - [X] T044 [P] Actualizar los documentos de la 002 (plan, research R6, data-model, contracts, quickstart y tareas): el backend ya no tiene secrets y el frontend recibe `vars.VITE_FIREBASE_*`
 - [X] T045 Pasar las compuertas: backend (`gofmt`, `vet`, `golangci-lint`, `test`) y frontend (`npm run build`, `npm run lint`)
-- [ ] T046 Probar en local los escenarios 1 a 19 del quickstart: backend local contra el Firestore y el Firebase Auth reales, y Vite con `.env.local`. Cuentas de correo de prueba y la cuenta Google del responsable
-- [ ] T047 (visto bueno) Publicar backend y frontend (`main` → `production`, uno después del otro) y repetir en producción los escenarios 1, 3, 5, 6, 7 y 20 (este cuando el dominio esté conectado)
-- [ ] T048 Limpieza del quickstart:
+- [X] T046 Probar en local los escenarios 1 a 19 del quickstart: backend local contra el Firestore y el Firebase Auth reales, y Vite con `.env.local`. Cuentas de correo de prueba y la cuenta Google del responsable
+- [X] T047 (visto bueno) Publicar backend y frontend (`main` → `production`, uno después del otro) y repetir en producción los escenarios 1, 3, 5, 6, 7 y 20 (este cuando el dominio esté conectado)
+- [X] T048 Limpieza del quickstart:
   - borrar las cuentas de prueba en Authentication y sus documentos en `links`, `attendance` y `loginAttempts`;
   - restaurar cualquier invitado quitado.
 - [ ] T049 (responsable) Borrar el secret `SESSION_KEY` de `snsilvam/vamosjuntos-backend`
@@ -336,3 +336,43 @@ sesión) → Polish y publicación (T047).
   - T047: publicar ambos;
   - T048: limpieza.
 - **Al final**: T050, con las notas del resultado de T017.
+
+### Validación local T046 (2026-10-30)
+
+- **App web**: registrada por API, `vamosjuntos-web` con `appId 1:54833988307:web:8b503bee87443d81ca0a26`.
+  La configuración pública quedó en `.env.local`, ignorado por git (T004).
+- **API**: backend local contra Firebase Auth y Firestore reales, 17/17 PASS. Se usaron 4 cuentas
+  de correo de prueba y los códigos reales, sin imprimirlos. Cubre los escenarios 2, 3, 4, 5, 6,
+  7, 9, 10, 11, 12, 13 y 14, además del `403 not_linked`.
+- **UI**: Chrome a 360 px contra Vite local, 13/13 PASS: inicio de sesión, crear cuenta, lista,
+  código equivocado, vincular, confirmar, recargar, cerrar sesión y volver a entrar sin código.
+  Áreas táctiles de 44 px o más, sin scroll horizontal y sin excepciones de JavaScript.
+- **Hallazgo corregido**: el enlace "Usar otra cuenta" medía 20 px de alto; ahora es un botón de
+  44 px.
+- **No automatizados**: 15 y 16 (cubiertos por pruebas de Go), 18 (correo de restablecimiento
+  real), 19 (ventana de Google) y 20 (dominio, en producción).
+- **Limpieza**:
+  - 6 cuentas de prueba borradas, junto con sus vínculos, respuestas e intentos;
+  - en `attendance` solo queda la confirmación real de Sergio, hecha con la app publicada
+    (versión 001);
+  - `links` está vacía.
+- **Incidente**: un backend viejo (001) seguía escuchando en `:8091` y la primera corrida le
+  pegó a él. No escribió nada, porque rechaza esas llamadas antes de tocar Firestore. Se detuvo
+  el proceso y se repitió.
+
+### Publicación T017 y T047 (2026-10-30)
+
+- **Backend** `dd7e102` → `production`: ejecución #2 en verde; revisión
+  `vamosjuntos-backend-00002-n48`, con variables `GOOGLE_CLOUD_PROJECT`, `EVENT_ID` y
+  `FIRESTORE_DATABASE` y ya sin `SESSION_KEY`.
+- **T017 (research R4)**: `GET https://vamosjuntos-club.web.app/api/me` responde `401` sin token
+  y `200 {"status":"unlinked"}` con `Authorization: Bearer <token>`. **Firebase Hosting sí
+  reenvía `Authorization`**, así que el plan B (cookie `__session`) no hizo falta.
+- **Frontend** `e675aa9` → `production`: ejecución #2 en verde; "Validate Firebase config"
+  confirmó las 4 variables de GitHub.
+- **Producción en `https://vamosjuntos.club`**: el recorrido de Chrome a 360 px dio 13/13 PASS,
+  con una cuenta de correo de prueba vinculada a Melissa.
+- **Limpieza (T048)**:
+  - cuenta y vínculo de prueba borrados, y Melissa vuelve a estar pendiente;
+  - en producción quedan 0 cuentas en Authentication, `links` vacía y solo la confirmación real
+    de Sergio en `attendance`.
