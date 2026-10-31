@@ -66,3 +66,11 @@ Con backend y frontend corriendo (o publicados), entra con la cuenta confirmada.
 
 El paso 7 sustituye simular fechas en producción: el backend no tiene un modo para fingir la hora
 (research R8).
+
+## 4. Enmienda del 2026-10-30: reloj en vivo
+
+| # | Paso | Esperado |
+|---|------|----------|
+| 13 | Anula `/api/countdown` con `{"phase":"far","daysLeft":54,"secondsToNextChange":3600,"secondsToStart":4680000}` (54 d 4 h) | "54" y el reloj desde "54d 04h 00m 00s", que avanza cada segundo |
+| 14 | Lo mismo con `"secondsToStart":4636800` (53 d 16 h) y `"daysLeft":54` | "53" y "53d 16h 00m 00s": el número sigue al reloj, no a `daysLeft` |
+| 15 | `{"phase":"today","daysLeft":0,"secondsToNextChange":18000,"secondsToStart":18000}` | "{nombre}," y "¡Hoy es el día!" en grande, sin número, y el reloj "0d 05h 00m 00s" |

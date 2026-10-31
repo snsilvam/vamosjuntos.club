@@ -155,7 +155,7 @@ pendientes −1 (quickstart, escenarios 4, 5 y 7).
   pipeline).
 - [X] T016 [P] En `vamosjuntos-frontend`, correr `npm run lint` y `npm run build` (con el chequeo de
   tipos); deben pasar sin errores.
-- [ ] T017 (visto bueno) Con la 008 ya en producción (T047 de su `tasks.md`):
+- [X] T017 (visto bueno) Con la 008 ya en producción (T047 de su `tasks.md`):
   - integrar `003-card-proximo-viaje` en `main` en los dos repos;
   - publicar con `git push origin main:production`, primero el backend y luego el frontend;
   - recorrer los escenarios 1–9 de [quickstart.md](quickstart.md) y deshacer el escenario 5.
@@ -198,3 +198,15 @@ T008 (attendance.go)  |  T009 (attendance_test.go)  |  T012 (types.ts)  |  T013 
   - el bundle publicado trae la card y los textos de los conteos.
 - **Pendiente (T017)**: el recorrido de los escenarios 1 a 9 del quickstart con una sesión de
   invitado confirmado en producción. Nadie ha visto todavía la card con sesión iniciada.
+
+### Validación en producción T017 (2026-10-30)
+
+- **Método**: cuentas de correo de prueba vinculadas a invitados pendientes (la familia ya usa la
+  app: 4 vínculos reales), contra `https://vamosjuntos.club`. Al final se borró todo; `links` y
+  `attendance` quedaron iguales a antes.
+- **API**: escenarios 1, 2, 4, 5, 7 y 8 en verde. Los conteos coinciden con `attendance` (23
+  invitados) y "confirmar a otro" suma 1 a confirmados.
+- **UI, Chrome a 360 px**: escenarios 1, 2, 3 (Tokio) y 9 en verde, sin scroll horizontal ni
+  excepciones de JavaScript.
+- **No se corrió en producción**: el escenario 6 (renombrar `destination` del evento real), para
+  no mostrarle un error a la familia. Lo cubren las pruebas de `GET /api/event`.

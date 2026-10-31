@@ -19,7 +19,8 @@ Response `200`:
 {
   "phase": "far",               // far | near | lastWeek | tomorrow | today | ongoing | finished
   "daysLeft": 54,               // días calendario de Colombia hasta el inicio; 0 desde el día del evento
-  "secondsToNextChange": 50400  // ausente cuando phase = "finished"
+  "secondsToNextChange": 50400, // ausente cuando phase = "finished"
+  "secondsToStart": 4635761     // segundos hasta el inicio; ausente desde el inicio (enmienda 2026-10-30)
 }
 ```
 
@@ -39,7 +40,8 @@ La respuesta no lleva fechas absolutas ni datos de invitados. El nombre del bann
 - Se pide al montar el banner, al vencer `secondsToNextChange` y al volver la pestaña a visible
   (research R3).
 - Nunca se compara con `Date.now()`: `secondsToNextChange` se usa solo como duración de un
-  `setTimeout`.
+  `setTimeout`, y `secondsToStart` como punto de partida del reloj, que descuenta el tiempo
+  transcurrido medido con `performance.now()` (data-model, "Reloj").
 
 ## Mensajes en la UI
 

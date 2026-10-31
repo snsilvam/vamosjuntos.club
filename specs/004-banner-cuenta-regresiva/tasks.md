@@ -235,7 +235,7 @@ nunca un número negativo.
   de tipos); deben pasar sin errores.
 - [X] T017 [P] Revisar a 360 px de ancho, con DevTools, los 7 tramos y los estados `loading` y
   `unavailable`, con "Nicolás López" y "mamá de lore" como nombre (quickstart, pasos 3, 6, 7 y 10).
-- [ ] T018 (visto bueno) Integrar y publicar, una feature a la vez y en coordinación con las
+- [X] T018 (visto bueno) Integrar y publicar, una feature a la vez y en coordinación con las
   sesiones de la 003 y la 005:
   - rebase de `004-banner-cuenta-regresiva` sobre `main` en los dos repos, resolviendo las líneas
     compartidas de `handlers.go`, `HomePage.tsx` y `types.ts`;
@@ -299,3 +299,56 @@ T008 (index.css)  |  T009 (Screen.tsx)   →   T010 (CountdownBanner.tsx)   → 
   - Falta decidirlo con `/speckit-clarify` y enmendar `spec.md`, `data-model.md` y
     `contracts/api.md` antes de corregir el código.
 - **Pendiente (T018)**: el recorrido del quickstart con sesión iniciada en producción.
+
+### Validación en producción T018 (2026-10-30)
+
+- **Método**: Chrome a 360 px con una cuenta de prueba vinculada a "Jeison - Nov laura" (nombre
+  largo), borrada al final.
+- **En verde**: pasos 1, 2, 3, 5, 6, 7 (con `today` como excepción), 8 y 10. Por API, `phase`,
+  `daysLeft`, `secondsToNextChange` y `secondsToStart` coinciden con el reloj (±5 s); `401` sin
+  token y `403 not_linked` sin vínculo.
+- **Confirmado en producción**: `today` muestra "faltan 0 días" y, después de las 2:00 p. m.,
+  "54" convive con "53d 15h". Se corrige con la enmienda de abajo.
+- **No automatizados**: 4 (reloj del sistema; cubierto por Tokio y por el reloj del backend), 9 y
+  11 (pestaña oculta) y 12 (sol).
+
+---
+
+## Phase 7: Enmienda del 2026-10-30 - Reloj en vivo coherente con el número (FR-002, FR-011)
+
+**Goal**: el reloj en vivo que pidió el responsable y el número grande salen del mismo conteo, y
+`tomorrow` y `today` muestran el mensaje con el reloj, sin número.
+
+**Independent Test**: pasos 1, 7 y 13 a 15 de [quickstart.md](quickstart.md).
+
+- [X] T019 Enmendar spec.md (Clarifications, US1, US3, FR-002, FR-011 y SC-002), data-model.md
+  (`secondsToStart`, tabla de tramos y sección "Reloj") y contracts/api.md. El backend ya entrega
+  `secondsToStart` desde `91ecbb6` y no cambia.
+- [X] T020 En `vamosjuntos-frontend/src/components/CountdownBanner.tsx`:
+  - el número grande es `floor(restantes / 86 400)` del mismo conteo del reloj;
+  - solo `far`, `near` y `lastWeek` llevan número;
+  - `tomorrow` y `today` muestran "{nombre}," y el mensaje en grande, con el reloj debajo.
+- [X] T021 Compuertas del frontend: `npm run lint` y `npm run build`.
+- [X] T022 Revisar a 360 px los 7 tramos con respuestas simuladas de `/api/countdown`, incluidas
+  `secondsToStart` = 54 d 4 h y 53 d 16 h, y `today` con 5 h.
+- [X] T023 (visto bueno) Integrar en `main`, publicar el frontend (`git push origin main:production`)
+  y repetir T022 en `vamosjuntos.club`.
+
+### Notas de la enmienda (2026-10-30)
+
+- **Frontend** `432cd8d` en `main`. Solo cambia `CountdownBanner.tsx`: el número sale de
+  `formatRemaining(secondsLeft).days`, solo `far`, `near` y `lastWeek` llevan número, y el reloj
+  se muestra en todos los tramos que traen `secondsToStart`. El backend no cambia.
+- **T021**: `npm run lint` y `npm run build` en verde.
+- **T022**: `vite preview` y Chrome a 360 px, con `/api/*` simulado por CDP (sin tocar
+  Firestore), 11/11 PASS:
+  - 54 d 4 h → "54";
+  - 53 d 16 h con `daysLeft` 54 → "53";
+  - cruce de día con la app abierta (54 → 53 junto con el reloj);
+  - `lastWeek` 1 d 18 h → "falta 1 día";
+  - `tomorrow` y `today` con mensaje y reloj, sin número;
+  - `ongoing` y `finished` sin reloj;
+  - sin excepciones de JavaScript.
+- **T023**: `432cd8d` publicado en `production`; la ejecución del frontend terminó en verde
+  (2026-10-31 03:35 UTC). Las mismas comprobaciones de T022 contra `https://vamosjuntos.club`:
+  11/11 PASS.

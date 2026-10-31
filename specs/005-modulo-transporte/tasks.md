@@ -146,7 +146,7 @@ En `vamosjuntos.club` solo se hace `git add` de `specs/005-modulo-transporte`.
 - [X] T019 Pasar las compuertas en los worktrees: backend (`gofmt` sin CR, `vet`, `golangci-lint`, `test`) y frontend (`build`, `lint`)
 - [X] T020 Validar en local contra Firebase y Firestore reales los escenarios del quickstart, con cuentas de prueba y Chrome a 360 px, incluido el escenario 12 (reservas simultáneas). Luego borrar los vehículos, cuentas, vínculos y respuestas de prueba
 - [X] T021 Hacer commit en las ramas `005-modulo-transporte` de los worktrees y en vamosjuntos.club (solo `specs/005-modulo-transporte`), y registrar aquí las notas de implementación
-- [ ] T022 (visto bueno, coordinado con las sesiones de la 003 y la 004) Integrar en `main` con rebase previo, publicar en `production` y probar en `vamosjuntos.club`
+- [X] T022 (visto bueno, coordinado con las sesiones de la 003 y la 004) Integrar en `main` con rebase previo, publicar en `production` y probar en `vamosjuntos.club`
 
 ---
 
@@ -208,3 +208,12 @@ Task: "tipos y mensajes del frontend (T008)"
   en `main`.
 - **Pendiente (T022)**: probar el módulo en `vamosjuntos.club` con sesión iniciada. La sesión que
   publicó se cortó justo después del deploy.
+
+### Validación en producción T022 (2026-10-30)
+
+- **API, con 5 cuentas de prueba**: escenarios 2 a 13 en verde, incluida la carrera por el último
+  cupo (`200`/`409`). Los vehículos de prueba se llamaron "[PRUEBA] …" y solo se borraron sus ids;
+  el vehículo real quedó intacto.
+- **No aplica en producción**: el escenario 1 ("sin vehículos"), porque ya hay un vehículo real.
+  Quedó cubierto por T020 en local.
+- **UI a 360 px**: la pantalla abre con los vehículos y "sin transporte", sin scroll horizontal.
