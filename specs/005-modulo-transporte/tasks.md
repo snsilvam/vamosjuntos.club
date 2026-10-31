@@ -196,3 +196,15 @@ Task: "tipos y mensajes del frontend (T008)"
   sí guarda y devuelve `06:30`.
 - **Limpieza**: 0 vehículos y 0 cuentas de prueba. Quedan la cuenta real del responsable
   (`men***@gmail.com`, vinculada a Sergio) y la confirmación de Sergio.
+
+## Publicación (2026-10-30)
+
+- **Publicado**:
+  - backend `96271fa` (revisión `vamosjuntos-backend-00005-nw8`) y frontend `4c3270b`, por
+    pipeline y en verde;
+  - `GET /api/transport` responde `401` sin token;
+  - el bundle publicado trae "Transporte: vehículos y cupos".
+- **Worktrees** `vamosjuntos-backend-005` y `vamosjuntos-frontend-005` quitados; la rama ya está
+  en `main`.
+- **Pendiente (T022)**: probar el módulo en `vamosjuntos.club` con sesión iniciada. La sesión que
+  publicó se cortó justo después del deploy.

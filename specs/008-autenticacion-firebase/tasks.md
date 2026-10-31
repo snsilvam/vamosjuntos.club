@@ -376,3 +376,18 @@ sesión) → Polish y publicación (T047).
   - cuenta y vínculo de prueba borrados, y Melissa vuelve a estar pendiente;
   - en producción quedan 0 cuentas en Authentication, `links` vacía y solo la confirmación real
     de Sergio en `attendance`.
+
+### Hotfix "Entrar con Google" (2026-10-30)
+
+- **Síntoma**: en producción, "Entrar con Google" mostraba "Algo salió mal. Intenta de nuevo en un
+  momento."
+- **Causa**: la variable de GitHub `VITE_FIREBASE_AUTH_DOMAIN` tenía un espacio al inicio. El SDK
+  armaba `https://%20vamosjuntos-club.firebaseapp.com` y fallaba antes de abrir el popup, con un
+  error sin código de Firebase.
+- **Arreglo** (frontend, en `production` y `main`):
+  - `0e9beff`: `src/auth/firebase.ts` quita los espacios de las cuatro `VITE_FIREBASE_*`;
+  - `18149fb`: `friendlyAuthMessage` traduce `auth/unauthorized-domain`,
+    `auth/operation-not-allowed`, `auth/invalid-api-key` y `auth/invalid-app-credential`.
+- **Incidente**: hubo un deploy de Hosting desde local, por fuera del pipeline, que luego reemplazó
+  el deploy por pipeline de `18149fb` (ver notas de la 002).
+- **Sigue pendiente**: T049.

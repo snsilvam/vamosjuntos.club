@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Pedido del responsable, recogido en la constitución v3.0.0 (Principio II): "Cada familiar
 inicia sesión con Firebase Authentication usando Google o correo y contraseña, igual que

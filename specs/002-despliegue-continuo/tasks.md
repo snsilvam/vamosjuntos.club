@@ -144,7 +144,7 @@ fases 3 y 4.
   2. `git push origin main` y `git push origin main:production`;
   3. seguir la ejecución en *Actions*;
   4. comprobar con `curl -i "$URL/api/onboarding/guests"` (quickstart §2.1).
-- [ ] T023 [US1] Validar los escenarios 1 y 2 de quickstart §3 en el backend:
+- [X] T023 [US1] Validar los escenarios 1 y 2 de quickstart §3 en el backend:
   - la revisión activa usa la imagen `:<commit>`;
   - un push a `main` no dispara nada.
 
@@ -190,8 +190,8 @@ fases 3 y 4.
   3. comprobar con los `curl` de quickstart §2.2: `/api/...` responde `no-store` y `/inicio` responde `no-cache`.
   - Si `firebase-tools` no acepta las credenciales federadas, detenerse y revisar research R8 antes
     de cambiar el diseño.
-- [ ] T032 [US2] (responsable) Conectar `vamosjuntos.club` en *Hosting → Agregar dominio personalizado* y cambiar los registros DNS en el registrador (quickstart §2.3)
-- [ ] T033 [US2] Validar los escenarios 3 y 4 de quickstart §3:
+- [X] T032 [US2] (responsable) Conectar `vamosjuntos.club` en *Hosting → Agregar dominio personalizado* y cambiar los registros DNS en el registrador (quickstart §2.3)
+- [X] T033 [US2] Validar los escenarios 3 y 4 de quickstart §3:
   - el texto nuevo aparece al recargar;
   - el commit queda en el historial de Hosting;
   - el onboarding completo funciona en el dominio, sin CORS y con `__session` de primera parte.
@@ -210,10 +210,11 @@ compuertas ya existen desde T016 y T026; esta fase las prueba.
 - [ ] T034 [US3] (visto bueno) Escenario 5: llevar a `production` un archivo de Go mal formateado y confirmar que la ejecución falla en `gofmt` y la revisión activa no cambia. Revertir después
 - [ ] T035 [US3] (visto bueno) Escenario 6: llevar a `production` un error de tipos del frontend y confirmar que falla en `npm run build` y el sitio no cambia. Revertir después
 - [ ] T036 [US3] (responsable) Escenario 7: confirmar que llegó el correo de GitHub por las ejecuciones fallidas de T034 y T035
-- [ ] T037 [US3] (responsable) Escenario 12, antes de abrir la app a la familia:
-  1. borrar el secret `SESSION_KEY` y usar "Run workflow";
-  2. confirmar que falla en "Validar secrets" sin desplegar;
-  3. crearlo de nuevo con un valor nuevo y relanzar.
+- [ ] T037 [US3] (responsable) Escenario 12, antes de abrir la app a la familia (desde la 008 el
+  backend no tiene secrets, así que la prueba pasa al frontend):
+  1. borrar temporalmente la variable `VITE_FIREBASE_APP_ID` del frontend y usar "Run workflow";
+  2. confirmar que falla en "Validate Firebase config" sin publicar y que el sitio anterior sigue;
+  3. restaurarla con el mismo valor y relanzar.
 
 **Checkpoint**: probado que un cambio roto no llega a producción.
 
@@ -365,3 +366,27 @@ push):
   T035, T038 y T039.
 - **Responsable**: T004 (Firebase), T010 (secrets), T011 (evento), T032 (dominio), T036 y T037.
 - **Después de lo anterior**: T012, T023, T033 y T040. T041 se hizo junto con estas notas.
+
+### Validación en producción (2026-10-30)
+
+- **T023, escenarios 1 y 2**:
+  - las 6 ejecuciones del backend corrieron solo en `production`, todas en verde;
+  - la revisión activa de Cloud Run es `vamosjuntos-backend-00006-xzg`, con la imagen
+    `vamosjuntos-backend:91ecbb6…`;
+  - los push a `main` (el último: `96271fa..91ecbb6`) no dispararon ningún workflow.
+- **T032**: `https://vamosjuntos.club` sirve la app y `/api/**` llega a Cloud Run.
+- **T033, escenarios 3 y 4**:
+  - cada deploy del frontend dejó su SHA en el historial de Hosting (`a36ce6b` … `264a388`) y su
+    texto en el bundle publicado;
+  - el recorrido completo en el dominio quedó cubierto por T047 de la 008 (13/13). Desde la 008 la
+    sesión va en `Authorization: Bearer`, no en `__session`.
+- **Escenario 13 de T040**: `git grep "secrets\."` en `.github` da 0 en los dos repos. La parte
+  de llaves privadas del escenario 14 también da 0. Faltan los códigos reales, que corre el
+  responsable.
+- **Incidente**: hay un release de Hosting a las 01:34 UTC sin mensaje de commit. Fue un
+  `firebase deploy` hecho desde local por fuera del pipeline, mientras se arreglaba el login con
+  Google. El deploy por pipeline de `18149fb` (01:38) lo reemplazó. Regla: solo se publica con push
+  a `production`.
+- **T037**: se reescribió con el escenario 12 actual (`VITE_FIREBASE_APP_ID`), porque el backend
+  ya no tiene secrets.
+- **Pendiente**: T034 a T040, salvo lo anterior.

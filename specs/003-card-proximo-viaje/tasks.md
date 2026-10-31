@@ -189,3 +189,12 @@ T008 (attendance.go)  |  T009 (attendance_test.go)  |  T012 (types.ts)  |  T013 
 2. **Incremento**: T008–T014 agregan los conteos.
 3. **Cierre**: T015–T016 en local. T017 cuando la 008 esté publicada, porque la card necesita su
    sesión.
+
+## Implementation Notes (2026-10-30)
+
+- **Publicado**:
+  - backend `3b6d693` y frontend `5143dc9`, por pipeline y en verde;
+  - `GET https://vamosjuntos.club/api/event` responde `401` sin token;
+  - el bundle publicado trae la card y los textos de los conteos.
+- **Pendiente (T017)**: el recorrido de los escenarios 1 a 9 del quickstart con una sesión de
+  invitado confirmado en producción. Nadie ha visto todavía la card con sesión iniciada.

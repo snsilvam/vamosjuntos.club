@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Derivado de la constitución v1.2.0 ("Despliegue Continuo"): "Pipelines de despliegue
 de GitHub: el backend a Cloud Run y el frontend a Firebase Hosting. Un push a `production`

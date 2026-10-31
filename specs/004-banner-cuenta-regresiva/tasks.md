@@ -278,3 +278,24 @@ T008 (index.css)  |  T009 (Screen.tsx)   →   T010 (CountdownBanner.tsx)   → 
 2. **Incremento**: T012–T013 hacen que el mensaje cambie en las semanas previas, y T014 cubre el día
    del evento y lo que sigue.
 3. **Cierre**: T015–T017 en local. T018 con el visto bueno y en el turno que acuerden las sesiones.
+
+## Implementation Notes (2026-10-30)
+
+- **Publicado**:
+  - backend `8b43ed7` y frontend `ea352ea`, por pipeline y en verde;
+  - `GET /api/countdown` responde `401` sin token;
+  - el worktree `vamosjuntos-backend-004` ya no existe. La carpeta vacía
+    `vamosjuntos-frontend-004` quedó bloqueada por Windows y hay que borrarla a mano.
+- **Desviación sin spec: contador en vivo** (pedido por el responsable en Codex; backend `91ecbb6`
+  y frontend `264a388`, ya en producción):
+  - el backend agrega `secondsToStart` a `Countdown` (`omitempty`, relativo, sin reloj del
+    dispositivo);
+  - el banner muestra `Nd hh mm ss` y suma `today` a los tramos con número.
+  - **Choca con la spec y el data-model**:
+    1. en `today`, el banner dice "faltan 0 días", y el data-model dice que ese tramo va sin
+       número;
+    2. de 2:00 p. m. a medianoche, el número grande (días calendario) y el reloj (bloques de 24 h)
+       difieren en 1. Ejemplo: el 30 de octubre a las 10:00 p. m. dice "54" y "53d 16h".
+  - Falta decidirlo con `/speckit-clarify` y enmendar `spec.md`, `data-model.md` y
+    `contracts/api.md` antes de corregir el código.
+- **Pendiente (T018)**: el recorrido del quickstart con sesión iniciada en producción.

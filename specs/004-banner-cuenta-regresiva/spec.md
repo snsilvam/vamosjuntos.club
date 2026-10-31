@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented (pendiente de enmienda: contador en vivo, ver tasks.md)
 
 **Input**: Derivado de la constitución v1.1.0 ("Dominio de la V1"): "Un banner MUY EXPRESIVO que
 le diga al usuario cuántos días faltan para el próximo evento al que está invitado."

@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Derivado de la constitución v1.1.0 ("Dominio de la V1"): "Card que muestra información
 del próximo evento: nombre, lugar de salida, lugar de llegada, fecha de inicio y fecha de fin.

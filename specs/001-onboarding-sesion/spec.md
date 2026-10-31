@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 > **Reemplazo parcial (constitución v3.0.0)**: la spec
 > [008-autenticacion-firebase](../008-autenticacion-firebase/spec.md) reemplaza FR-008, FR-009 y

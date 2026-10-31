@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: Derivado de la constitución v1.1.0 ("Dominio de la V1"): "Módulo Transporte: vehículos
 y cupos." Lugares de salida: Bogotá y Tocancipá. Destino: Acacías, Meta.
