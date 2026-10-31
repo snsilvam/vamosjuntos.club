@@ -44,7 +44,7 @@ Reglas que aplican a todas las tareas:
 ## Phase 1: Setup (Shared Infrastructure)
 
 - [X] T001 Crear la rama `008-autenticacion-firebase` desde `main` en vamosjuntos-backend y en vamosjuntos-frontend
-- [ ] T002 (responsable) Configurar Firebase Authentication según quickstart §1:
+- [X] T002 (responsable) Configurar Firebase Authentication según quickstart §1:
   1. registrar la app web `vamosjuntos-web`;
   2. habilitar los proveedores Google y Correo/contraseña;
   3. agregar `vamosjuntos.club` a los dominios autorizados;
@@ -226,7 +226,7 @@ el frontend tiene SDK, cliente y estado listos.
   - borrar las cuentas de prueba en Authentication y sus documentos en `links`, `attendance` y `loginAttempts`;
   - restaurar cualquier invitado quitado.
 - [ ] T049 (responsable) Borrar el secret `SESSION_KEY` de `snsilvam/vamosjuntos-backend`
-- [ ] T050 Quitar el Sync Impact Report de la constitución (v3.0.0), hacer commit de specs/008 y de los cambios en 001 y 002, y registrar en este tasks.md las notas de implementación y las desviaciones (en especial el resultado de T017)
+- [X] T050 Quitar el Sync Impact Report de la constitución (v3.0.0), hacer commit de specs/008 y de los cambios en 001 y 002, y registrar en este tasks.md las notas de implementación y las desviaciones (en especial el resultado de T017)
 
 ---
 
