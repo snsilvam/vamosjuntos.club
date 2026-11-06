@@ -6,6 +6,11 @@
 
 **Status**: Implemented
 
+> **Reemplazo parcial**: la spec [009-confirmar-otro-sin-codigo](../009-confirmar-otro-sin-codigo/spec.md)
+> reemplaza la US6 y el FR-013 (confirmar a otro con su código): ahora basta con elegir su nombre,
+> y solo se puede confirmar a pendientes sin cuenta vinculada. También acota el FR-014: el límite
+> de intentos queda solo para vincular. El resto de esta spec sigue vigente.
+
 **Input**: Pedido del responsable, recogido en la constitución v3.0.0 (Principio II): "Cada familiar
 inicia sesión con Firebase Authentication usando Google o correo y contraseña, igual que
 kaizen-app. La primera vez, ya autenticado, elige su nombre y escribe su código de invitación: eso

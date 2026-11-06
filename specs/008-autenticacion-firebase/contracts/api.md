@@ -85,6 +85,9 @@ Request: `{"attending": true}`
 
 ## `POST /api/guests/{guestId}/confirmation` 🔒C
 
+> Cambiada por la [009](../../009-confirmar-otro-sin-codigo/contracts/api.md): sin código, solo
+> para pendientes sin cuenta y con su lista en `GET /api/guests/confirmable`.
+
 Confirma a otro invitado pendiente con su código (FR-013). No crea vínculos. Cuenta para el límite
 de intentos. Sin cambios frente a la 001, salvo la autenticación.
 

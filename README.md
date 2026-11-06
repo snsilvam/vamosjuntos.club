@@ -26,6 +26,7 @@ pipeline: el código está en los repos hermanos.
 | [006](specs/006-modulo-itinerario/) | Módulo Itinerario | En producción | 19/19 | — |
 | [007](specs/007-modulo-compras/) | Módulo Compras | En producción | 21/21 | — |
 | [008](specs/008-autenticacion-firebase/) | Autenticación con Firebase | En producción | 49/50 | T049: borrar el secret `SESSION_KEY` |
+| [009](specs/009-confirmar-otro-sin-codigo/) | Confirmar a otro invitado sin su código | Integrada en `main` local, sin publicar | 15/16 | T015: subir, publicar y validar |
 
 Todo el alcance de "Dominio de la V1" está construido y publicado. Cada `tasks.md` tiene sus
 notas de implementación y la validación en producción.

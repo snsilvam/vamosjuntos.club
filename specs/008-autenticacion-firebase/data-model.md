@@ -59,7 +59,8 @@ y `not_invited` en los demás casos.
 
 Mismos campos (`failures`, `blockedUntil`) y misma regla (5 fallos → 15 minutos). Solo cambia el
 id del documento: antes era el `X-Device-Id` y ahora es el `uid` (FR-014). Cuentan como intento
-los códigos de `link` y los de confirmar a otro.
+los códigos de `link` y los de confirmar a otro (desde la 009, solo los de `link`: confirmar a otro
+ya no usa código).
 
 ## Sale
 
